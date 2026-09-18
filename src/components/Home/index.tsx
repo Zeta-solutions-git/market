@@ -1,172 +1,110 @@
-import {
-  useState,
-  useEffect,
-  ChangeEvent,
-  FormEvent,
-  KeyboardEvent,
-  ReactElement,
-  useRef
-} from 'react'
-import type { MouseEvent } from 'react'
+import { ReactElement } from 'react'
+import Link from 'next/link'
+import Logo from '@shared/atoms/Logo'
+import UserPreferences from '../Header/UserPreferences'
+import AuthEntry from '../Header/AuthEntry'
+import { useAuth } from '@hooks/useAuth'
 import styles from './index.module.css'
-import InputElement from '@shared/FormInput/InputElement'
 
-import Features from './Features/Features'
-import Upload from '@images/publish.svg'
-import SearchLogo from '@images/search.svg'
-import Menu from './Menu/Menu'
-import { addExistingParamsToUrl } from '../Search/utils'
-import { useRouter } from 'next/router'
-import { useSearchBarStatus } from '@context/SearchBarStatus'
-import { useUserPreferences } from '@context/UserPreferences'
-import Container from '@components/@shared/atoms/Container'
-import OnboardingSection from '@components/@shared/Onboarding'
+// Stripped-down OpenDataSpace landing page.
+// Sections: Nav (logo + links + search + login) · Hero · Info · Footer.
+// New structural bits (search, stats, image collage) are placeholders.
 
-async function emptySearch() {
-  const searchParams = new URLSearchParams(window?.location.href)
-  const text = searchParams.get('text')
+const NAV_LINKS = ['About us', 'Projects', 'The Team', 'Contact']
 
-  if (text !== '' && text !== undefined && text !== null) {
-    await addExistingParamsToUrl(location, ['text', 'owner', 'tags'])
-  }
+const FOOTER_COLS = [
+  {
+    heading: 'Company',
+    links: ['About us', 'The Team', 'Projects', 'Contact']
+  },
+  { heading: 'Resources', links: ['Documentation', 'Support', 'FAQ'] },
+  { heading: 'Legal', links: ['Privacy Policy', 'Terms of Service'] }
+]
+
+function LogoutButton(): ReactElement {
+  const { logout } = useAuth()
+  return (
+    <button
+      type="button"
+      className={styles.pillButton}
+      onClick={() => logout()}
+    >
+      <span className={styles.buttonContent}>
+        <span className={styles.buttonText}>Logout</span>
+      </span>
+    </button>
+  )
 }
 
-function HeroSection({
-  placeholder,
-  initialValue
-}: {
-  placeholder?: string
-  initialValue?: string
-}): ReactElement {
-  const router = useRouter()
-  const [value, setValue] = useState(initialValue || '')
-  const parsed = router.query
-  const searchBarRef = useRef<HTMLInputElement>(null)
-  const {
-    isSearchBarVisible,
-    setSearchBarVisible,
-    homeSearchBarFocus,
-    setHomeSearchBarFocus
-  } = useSearchBarStatus()
-
-  useEffect(() => {
-    if (parsed?.text || parsed?.owner)
-      setValue((parsed?.text || parsed?.owner) as string)
-  }, [parsed?.text, parsed?.owner])
-
-  useEffect(() => {
-    setSearchBarVisible(false)
-    setHomeSearchBarFocus(false)
-  }, [setSearchBarVisible, setHomeSearchBarFocus])
-
-  useEffect(() => {
-    if (!isSearchBarVisible && !homeSearchBarFocus) return
-    if (searchBarRef?.current) {
-      searchBarRef.current.focus()
-    }
-  }, [isSearchBarVisible, homeSearchBarFocus])
-
-  async function startSearch() {
-    if (value === '') setValue(' ')
-
-    const urlEncodedValue = encodeURIComponent(value)
-    const url = await addExistingParamsToUrl(location, [
-      'text',
-      'owner',
-      'tags'
-    ])
-    router.push(`${url}&text=${urlEncodedValue}`)
-  }
-
-  function handleChange(e: ChangeEvent<HTMLInputElement>) {
-    setValue(e.target.value)
-    e.target.value === '' && emptySearch()
-  }
-
-  async function handleKeyPress(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      await startSearch()
-    }
-  }
-
-  async function handleButtonClick(e: FormEvent<HTMLButtonElement>) {
-    e.preventDefault()
-    await startSearch()
-  }
-  const handlePublishClick = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    router.push('/publish/1')
-  }
-  const handleCatalogClick = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    router.push('/search?sort=indexedMetadata.event.block&sortOrder=desc')
-  }
-
+function Nav(): ReactElement {
   return (
-    <section className={styles.hero}>
-      <div className={styles.contentContainer}>
-        <header>
-          <Menu />
-        </header>
-        <div className={styles.textContent}>
-          <h1 className={styles.title}>
-            Ocean Enterprise Demonstration Marketplace
-          </h1>
-          <div className={styles.subtitle}>
-            <p>
-              Publish, find, compare, manage and monetize proprietary data & AI
-              products in a secure, trusted and compliant environment
-            </p>
+    <header className={styles.nav}>
+      <div className={styles.navInner}>
+        <div className={styles.navLeft}>
+          <Link
+            href="/"
+            className={styles.navLogo}
+            aria-label="OpenDataSpace home"
+          >
+            <Logo />
+          </Link>
+          <nav className={styles.navLinks} aria-label="Primary">
+            {NAV_LINKS.map((label) => (
+              <a key={label} href="#" className={styles.navLink}>
+                {label}
+              </a>
+            ))}
+          </nav>
+        </div>
+        <div className={styles.navActions}>
+          {/* Settings (⚙) — kept from before */}
+          <UserPreferences />
+          {/* pill-shaped button = Login (Logout when authenticated) */}
+          <AuthEntry
+            authenticatedContent={<LogoutButton />}
+            loginClassName={styles.pillButton}
+            buttonContentClassName={styles.buttonContent}
+            buttonTextClassName={styles.buttonText}
+          />
+        </div>
+      </div>
+    </header>
+  )
+}
+
+function Hero(): ReactElement {
+  return (
+    <section className={styles.hero} aria-label="Hero">
+      <div className={styles.heroInner}>
+        {/* LEFT COLUMN — text */}
+        <div className={styles.heroText}>
+          <h1 className={styles.heroTitle}>Making data more accessible</h1>
+          <p className={styles.heroSubtitle}>
+            Smaller supporting text placeholder in grey — a sentence or two
+            introducing OpenDataSpace goes here.
+          </p>
+          <div className={styles.stats}>
+            <span className={styles.statNumber}>123</span>
+            <span className={styles.statDivider} aria-hidden="true" />
+            <span className={styles.statLabel}>Stat label placeholder</span>
           </div>
-          <div className={styles.ctaContainer}>
-            <div className={styles.ctaBlock}>
-              <h3 className={styles.ctaTitle}>Publish an asset</h3>
-              <button className={styles.ctaButton} onClick={handlePublishClick}>
-                <div className={styles.buttonContent}>
-                  <Upload className={styles.uploadIcon} />
-                  <span className={styles.buttonText}>Publish</span>
-                </div>
-              </button>
+          <button type="button" className={styles.discoverButton}>
+            Discover more
+          </button>
+        </div>
+
+        {/* RIGHT COLUMN — image collage (placeholders, <img>-ready) */}
+        <div className={styles.heroCollage}>
+          <div className={styles.collageStack}>
+            <div className={styles.collageImg16} aria-hidden="true">
+              <span>Image</span>
             </div>
-
-            <div className={styles.divider}></div>
-
-            <form
-              className={styles.searchBlock}
-              autoComplete={!value ? 'off' : 'on'}
-            >
-              <h3 className={styles.ctaTitle}>Search for data</h3>
-              <div className={styles.searchContainer}>
-                <InputElement
-                  ref={searchBarRef}
-                  type="search"
-                  name="search"
-                  placeholder={placeholder || 'Search'}
-                  value={value}
-                  onChange={handleChange}
-                  required
-                  size="large"
-                  className={styles.searchInput}
-                  onKeyPress={handleKeyPress}
-                />
-                <button
-                  onClick={handleButtonClick}
-                  className={styles.searchButton}
-                >
-                  <SearchLogo className={styles.searchIcon} />
-                </button>
-              </div>
-            </form>
-            <div className={styles.divider}></div>
-
-            <div className={styles.ctaBlock}>
-              <h3 className={styles.ctaTitle}>Go to Catalogue</h3>
-              <button className={styles.ctaButton} onClick={handleCatalogClick}>
-                <div className={styles.buttonContent}>
-                  <span className={styles.buttonText}>Catalogue</span>
-                </div>
-              </button>
+            <div className={styles.collageImg16} aria-hidden="true">
+              <span>Image</span>
             </div>
+          </div>
+          <div className={styles.collagePortrait} aria-hidden="true">
+            <span>Image</span>
           </div>
         </div>
       </div>
@@ -174,21 +112,66 @@ function HeroSection({
   )
 }
 
-export default function HomePage(): ReactElement {
-  const { showOnboardingModule } = useUserPreferences()
-
+function InfoSection(): ReactElement {
   return (
-    <>
-      <HeroSection />
-      {showOnboardingModule && (
-        <>
-          <div className={styles.divider}></div>
-          <Container>
-            <OnboardingSection />
-          </Container>
-        </>
-      )}
-      <Features />
-    </>
+    <section className={styles.info} aria-label="Info section">
+      <div className={styles.sectionInner}>
+        <span className={styles.placeholderTag}>Info section</span>
+        <p className={styles.placeholderBody}>
+          Info section placeholder — feature highlights, value propositions or
+          content blocks go here.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+function SiteFooter(): ReactElement {
+  return (
+    <footer className={styles.footer} aria-label="Footer">
+      <div className={styles.footerInner}>
+        <div className={styles.footerMain}>
+          <Link
+            href="/"
+            className={styles.footerLogo}
+            aria-label="OpenDataSpace home"
+          >
+            <Logo />
+          </Link>
+          <div className={styles.footerCols}>
+            {FOOTER_COLS.map((col) => (
+              <div key={col.heading} className={styles.footerCol}>
+                <h4 className={styles.footerHeading}>{col.heading}</h4>
+                <ul className={styles.footerList}>
+                  {col.links.map((label) => (
+                    <li key={label}>
+                      <a href="#" className={styles.footerLink}>
+                        {label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className={styles.footerBottom}>
+          <span className={styles.footerCopy}>
+            © 2026 OpenDataSpace. All rights reserved.
+          </span>
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+export default function HomePage(): ReactElement {
+  return (
+    <div className={styles.landing}>
+      <Nav />
+      <Hero />
+      <InfoSection />
+      <SiteFooter />
+    </div>
   )
 }

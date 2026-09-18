@@ -214,7 +214,8 @@ export default function App({
 
       <main className={styles.main}>{children}</main>
 
-      <Footer />
+      {/* Home renders its own footer inside the landing scaffold */}
+      {!isRoot && <Footer />}
 
       <SsiWalletManager />
 

@@ -5,10 +5,8 @@
   transition: width 0.3s ease, height 0.3s ease;
 }
 
-.logo path {
-  fill: white;
-}
-
+/* OpenDataSpace logo keeps its own fills (colored mark + white wordmark for the
+   dark header). Do NOT force `fill` here or the brand colors collapse to one. */
 a > .logo:hover path {
   /* fill: var(--menu-logo-color-hover); */
 }
