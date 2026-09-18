@@ -3,6 +3,11 @@ out
 .DS_Store
 .idea
 .env
+# Local secret backups / variants — never commit. Keep templates/examples only.
+.env.*
+!.env.example
+!.env.template
+*.bak
 coverage
 .cache
 .next

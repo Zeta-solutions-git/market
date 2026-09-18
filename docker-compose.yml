@@ -1,10 +1,11 @@
-version: '3.8'
+name: oe-market
 services:
   ocean-market:
-    image: oceanenterprise/market:latest
+    image: oceanenterprise/market:v1.5.0
     container_name: ocean-market
     ports:
-      - '8008:8008'
+      # Localhost only: nginx terminates TLS on 443 and proxies here.
+      - '127.0.0.1:8008:8008'
     env_file:
       - .env
     environment:
