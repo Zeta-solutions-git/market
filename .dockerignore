@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+*.bak
+coverage
+.cache
+.swc
+.vercel
+storybook-static
