@@ -154,6 +154,34 @@ function hasServiceEndpointFilter(filters?: FilterTerm[]): boolean {
   )
 }
 
+// The op_ddo_v5.0.0 index maps `credentialSubject.services` as a NESTED object
+// with `serviceEndpoint` as a plain keyword (no `.keyword` subfield). The stock
+// flat `terms` on `...serviceEndpoint.keyword` therefore matches nothing and hides
+// every asset from the catalogue. Build the default-node filter as a nested query
+// on the real field, matching the endpoint both with and without a trailing slash
+// so publish-time (PROVIDER_URL) and filter-time values line up regardless of slash.
+function getDefaultNodeEndpointFilter(uris: string | string[]): FilterTerm {
+  const list = Array.isArray(uris) ? uris : [uris]
+  const values = [
+    ...new Set(
+      list.filter(Boolean).flatMap((uri) => {
+        const noSlash = String(uri).replace(/\/+$/, '')
+        return [noSlash, `${noSlash}/`]
+      })
+    )
+  ]
+  return {
+    nested: {
+      path: 'credentialSubject.services',
+      query: {
+        terms: {
+          'credentialSubject.services.serviceEndpoint': values
+        }
+      }
+    }
+  } as unknown as FilterTerm
+}
+
 export function generateBaseQuery(
   baseQueryParams: BaseQueryParams,
   index?: string,
@@ -195,14 +223,7 @@ export function generateBaseQuery(
             }
           },
           ...(shouldApplyDefaultNodeFilter
-            ? [
-                {
-                  terms: {
-                    'credentialSubject.services.serviceEndpoint.keyword':
-                      nodeUriIndex
-                  }
-                }
-              ]
+            ? [getDefaultNodeEndpointFilter(nodeUriIndex)]
             : []),
           ...(dataspaceFilterTerm ? [dataspaceFilterTerm] : [])
         ]
