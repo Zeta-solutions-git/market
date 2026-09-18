@@ -1,7 +1,9 @@
 name: oe-market
 services:
   ocean-market:
-    image: oceanenterprise/market:v1.5.0
+    # Our fork image (built from this repo). Roll back to
+    # oceanenterprise/market:v1.5.0 to return to stock.
+    image: zeta-market:catalogue-fix
     container_name: ocean-market
     ports:
       # Localhost only: nginx terminates TLS on 443 and proxies here.

@@ -17,6 +17,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 RUN apk add --no-cache bash git
+# Cap the build heap so the production build can't OOM the host it builds on.
+ENV NODE_OPTIONS=--max-old-space-size=4096
 RUN npm run build
 
 FROM base AS runner
