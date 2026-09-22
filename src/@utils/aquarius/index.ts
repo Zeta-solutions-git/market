@@ -66,6 +66,25 @@ function getRangeFilterTerm(filterField: string, gteValue: string): FilterTerm {
   }
 }
 
+// `credentialSubject.services` is mapped as a NESTED object in the node's
+// op_ddo_v5 index, so a flat term/terms query on `services.serviceEndpoint`
+// (with or without a `.keyword` subfield) matches zero docs — which silently
+// empties the whole catalogue. It must be wrapped in a nested query. Endpoints
+// are compared without a trailing slash because the index stores them bare,
+// while PROVIDER_URL / NODE_URI_INDEXED usually carry one.
+export function getServiceEndpointFilter(endpoints: TFilterValue): FilterTerm {
+  const list = (Array.isArray(endpoints) ? endpoints : [endpoints])
+    .filter((value): value is string => typeof value === 'string')
+    .map((value) => value.replace(/\/+$/, ''))
+
+  return {
+    nested: {
+      path: 'credentialSubject.services',
+      query: getFilterTerm('credentialSubject.services.serviceEndpoint', list)
+    }
+  } as unknown as FilterTerm
+}
+
 export function parseFilters(
   filtersList: Filters,
   filterSets: { [key: string]: string[] }
@@ -99,6 +118,11 @@ export function parseFilters(
         const targetDate = new Date(now.getTime() - Number(filtersList[key][0]))
         const targetDateISOString = targetDate.toISOString()
         return getRangeFilterTerm(filterQueryPath[key], targetDateISOString)
+      }
+      if (key === 'nodeUriIndex') {
+        return filtersList[key]?.length > 0
+          ? getServiceEndpointFilter(filtersList[key])
+          : undefined
       }
       if (filtersList[key]?.length > 0) {
         return getFilterTerm(filterQueryPath[key], filtersList[key])
@@ -148,7 +172,7 @@ function hasServiceEndpointFilter(filters?: FilterTerm[]): boolean {
   return (
     filters?.some((filter) =>
       JSON.stringify(filter).includes(
-        'credentialSubject.services.serviceEndpoint.keyword'
+        'credentialSubject.services.serviceEndpoint'
       )
     ) || false
   )
@@ -195,14 +219,7 @@ export function generateBaseQuery(
             }
           },
           ...(shouldApplyDefaultNodeFilter
-            ? [
-                {
-                  terms: {
-                    'credentialSubject.services.serviceEndpoint.keyword':
-                      nodeUriIndex
-                  }
-                }
-              ]
+            ? [getServiceEndpointFilter(nodeUriIndex)]
             : []),
           ...(dataspaceFilterTerm ? [dataspaceFilterTerm] : [])
         ]
