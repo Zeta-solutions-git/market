@@ -208,7 +208,13 @@ function getSearchQuery(
       from: normalizedPage,
       size: Number(offset) || 21
     },
-    sortOptions: { sortBy: sort, sortDirection },
+    // Default to newest-first when the URL carries no sort (plain /search),
+    // otherwise sortBy is undefined and ES sorts on a field literally named
+    // "undefined", which matches nothing and empties the catalogue.
+    sortOptions: {
+      sortBy: sort || SortTermOptions.Created,
+      sortDirection: sortDirection || SortDirectionOptions.Descending
+    },
     filters
   } as BaseQueryParams
 

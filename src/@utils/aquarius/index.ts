@@ -231,9 +231,12 @@ export function generateBaseQuery(
     generatedQuery.aggs = baseQueryParams.aggs
   }
 
-  if (baseQueryParams.sortOptions !== undefined) {
+  // Only sort when a real field is given. A missing/empty sortBy would
+  // otherwise emit sort on a field named "undefined", which ES matches to zero
+  // docs and silently empties the results.
+  if (baseQueryParams.sortOptions?.sortBy) {
     generatedQuery.sort = {
-      [`${baseQueryParams.sortOptions.sortBy}`]:
+      [baseQueryParams.sortOptions.sortBy]:
         baseQueryParams.sortOptions.sortDirection ||
         SortDirectionOptions.Descending
     }
