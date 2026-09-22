@@ -139,6 +139,71 @@
   line-height: 1;
 }
 
+/* boxed CTA in the brighter accent blue (Catalogue / Publish) */
+.catalogueButton {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--secondary, #316aea);
+  background: var(--secondary, #316aea);
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.catalogueButton:hover {
+  background: #ffffff;
+  color: var(--secondary, #316aea);
+  border-color: var(--secondary, #316aea);
+}
+
+.publishIcon {
+  margin-right: 8px;
+}
+
+/* the publish icon lives inside .navActions, whose global rule forces svg fill
+   navy — override so it reads white on the blue button (and blue on hover) */
+.catalogueButton svg,
+.catalogueButton svg path {
+  width: 18px !important;
+  height: 18px !important;
+  fill: #ffffff !important;
+}
+
+.catalogueButton:hover svg,
+.catalogueButton:hover svg path {
+  fill: var(--secondary, #316aea) !important;
+}
+
+/* unboxed text CTA (Sign up) */
+.signupLink {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #092861;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.signupLink:hover {
+  text-decoration: underline;
+}
+
+/* functional controls cluster shown on the catalogue page */
+.catalogueControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 /* ---------- FOOTER (traditional) ---------- */
 .footer {
   background: #0c1a3a;
