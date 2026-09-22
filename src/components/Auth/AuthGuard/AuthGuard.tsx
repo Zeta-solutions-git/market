@@ -30,8 +30,20 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       return true
     }
 
+    // TODO(re-gate catalogue): the catalogue (/search) and asset detail pages
+    // (/asset/[did]) are intentionally PUBLIC for now so anyone can browse
+    // listings without logging in (buying/publishing/editing still gate). Revert
+    // this — drop '/search' from exactPublicPaths and remove the '/asset/[did]'
+    // case — when catalogue browsing should require authentication again.
+    // Note: '/asset/[did]/edit' is deliberately NOT matched here, so editing
+    // stays gated.
+    if (router.pathname === '/asset/[did]') {
+      return true
+    }
+
     const exactPublicPaths = [
       '/',
+      '/search',
       '/onboarding',
       '/auth/callback',
       '/about',
