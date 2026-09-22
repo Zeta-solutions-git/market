@@ -2,6 +2,8 @@
    Colors/fonts unchanged from before — this file only sets structure/spacing. */
 
 .landing {
+  /* secondary accent for the landing page (kept as a variable for reuse) */
+  --secondary: #316aea;
   display: flex;
   flex-direction: column;
   min-height: 100%;
@@ -11,7 +13,7 @@
 /* ---------- HEADER ---------- */
 .nav {
   background: #ffffff;
-  padding: 15px 0; /* full-width bar, 15px top/bottom */
+  padding: 12.75px 0; /* full-width bar (15% shorter than 15px) */
   border-bottom: 1px solid #e5e7eb; /* 1px solid bottom border */
   /* settings cog/caret inherit these so the icon is dark on the white nav */
   --menu-icon-fill-color: #092861;
@@ -19,6 +21,7 @@
 }
 
 .navInner {
+  position: relative;
   max-width: 1320px;
   margin: 0 auto;
   padding: 0 20px;
@@ -28,41 +31,57 @@
   gap: 24px;
 }
 
-/* logo + links grouped; medium gap between them */
-.navLeft {
-  display: flex;
-  align-items: center;
-  gap: 64px;
-}
-
 .navLogo {
   display: flex;
   align-items: center;
   color: #092861; /* wordmark (currentColor) navy on white */
+  /* trim the SVG's internal whitespace so the bar is shorter
+     without shrinking the logo itself */
+  margin: -16px 0;
 }
 
 .navLogo svg {
-  height: 7.5rem !important;
+  height: 6.375rem !important; /* 15% smaller (was 7.5rem) */
   width: auto !important;
 }
 
+/* links absolutely centered in the bar, independent of logo/actions widths */
 .navLinks {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   gap: 36px;
 }
 
 .navLink {
+  position: relative;
   color: #092861;
   font-family: inherit;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 400;
   text-decoration: none;
-  transition: opacity 0.15s ease;
 }
 
-.navLink:hover {
-  opacity: 0.7;
+/* underline that grows in from the left on hover and retracts to the right */
+.navLink::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.25s ease;
+}
+
+.navLink:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
 }
 
 .navActions {
@@ -130,8 +149,8 @@
 
 /* LEFT COLUMN — ~45%, max 520 */
 .heroText {
-  flex: 0 1 45%;
-  max-width: 520px;
+  flex: 0 1 55%;
+  max-width: 640px;
   min-width: 0;
 }
 
@@ -148,7 +167,7 @@
   color: #6b7280;
   font-size: 1.15rem;
   line-height: 1.6;
-  max-width: 400px;
+  max-width: 560px;
   margin: 24px 0 0;
 }
 
@@ -279,30 +298,137 @@
   margin: 0;
 }
 
+/* ---------- LOGO STRIP (partners marquee) ---------- */
+.logoStrip {
+  background: #ffffff;
+  padding: 40px 0;
+  border-top: 1px solid #eef1f6;
+  border-bottom: 1px solid #eef1f6;
+  overflow: hidden;
+}
+
+.logoItem {
+  height: 44px;
+  width: auto;
+  margin: 0 48px;
+  object-fit: contain;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+/* full colour by default; turns grey on hover */
+.logoItem:hover {
+  filter: grayscale(100%);
+  opacity: 0.65;
+}
+
 /* ---------- INFO ---------- */
 .info {
   background: #f5f7fa;
   color: #092861;
-  min-height: 40vh;
-  display: flex;
-  align-items: center;
   padding: 96px 0;
 }
 
-.info .placeholderTag {
-  background: rgba(108, 156, 0, 0.14);
-  color: #6c9c00;
+/* two columns: text left, feature cards stacked right */
+.infoLayout {
+  display: flex;
+  align-items: center;
+  gap: 64px;
 }
 
-.info .placeholderBody {
+.infoText {
+  flex: 1 1 55%;
+  min-width: 0;
+}
+
+.infoTitle {
+  color: #092861;
+  font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0 0 28px;
+}
+
+.infoIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.infoIntro p {
   color: #52607a;
+  font-size: 1.1rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.infoOutro {
+  color: #52607a;
+  font-size: 1.1rem;
+  line-height: 1.65;
+  margin: 28px 0 0;
+}
+
+/* right column — cards stacked underneath each other */
+.featureList {
+  flex: 1 1 45%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.featureCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 22px 24px;
+  background: #ffffff;
+  border: 1px solid #e6ebf2;
+  border-radius: 14px;
+}
+
+.featureIcon {
+  color: var(--secondary);
+  font-size: 34px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.featureCopy {
+  min-width: 0;
+}
+
+.featureTitle {
+  color: #092861;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.featureBody {
+  color: #52607a;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+@media screen and (max-width: 60rem) {
+  .infoLayout {
+    flex-direction: column;
+    gap: 40px;
+  }
+  .infoText,
+  .featureList {
+    flex: 1 1 auto;
+    width: 100%;
+  }
 }
 
 /* ---------- FOOTER (traditional) ---------- */
 .footer {
   background: #0c1a3a;
   color: #ffffff;
-  padding: 64px 0 32px;
+  padding: 64px 0 20px;
   margin-top: auto;
 }
 
@@ -312,19 +438,12 @@
   padding: 0 20px;
 }
 
-/* logo left, columns grouped on the right */
-.footerMain {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 64px;
-  padding-bottom: 48px;
-}
-
+/* three link columns, grouped and centered on the page */
 .footerCols {
   display: flex;
-  flex-wrap: wrap;
-  gap: 64px;
+  justify-content: center;
+  gap: 288px;
+  padding-bottom: 48px;
 }
 
 .footerCol {
@@ -359,6 +478,7 @@
   color: #ffffff;
 }
 
+/* under the line: logo hard-left, copyright hard-right — kept tight vertically */
 .footerBottom {
   display: flex;
   align-items: center;
@@ -366,12 +486,15 @@
   gap: 24px;
   flex-wrap: wrap;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  padding-top: 28px;
+  padding-top: 8px;
 }
 
 .footerLogo {
   display: flex;
   align-items: center;
+  /* trim the SVG's internal whitespace so the row stays short
+     without shrinking the logo itself */
+  margin: -18px 0;
 }
 
 /* whole logo rendered white for the dark footer */
