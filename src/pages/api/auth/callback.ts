@@ -34,14 +34,16 @@ function getRequiredStringClaim(payload: JWTPayload, claim: string): string {
   return value
 }
 
-function buildLoginRedirect(params: Record<string, string>): string {
+function buildOnboardingRedirect(params: Record<string, string>): string {
   const qs = new URLSearchParams(params).toString()
-  return `/auth/login${qs ? `?${qs}` : ''}`
+  return `/onboarding${qs ? `?${qs}` : ''}`
 }
 
 function failRedirect(res: NextApiResponse, reason = 'auth_failed') {
   res.setHeader('Set-Cookie', buildClearTransientCookieStrings())
-  return res.redirect(302, buildLoginRedirect({ error: reason }))
+  // Auth failed -> user isn't logged in, so land on home (public) with an
+  // error flag the App picks up and toasts.
+  return res.redirect(302, `/?authError=${encodeURIComponent(reason)}`)
 }
 
 export default async function handler(
@@ -170,11 +172,11 @@ export default async function handler(
       ...buildClearTransientCookieStrings()
     ])
 
-    // Always return to /auth/login so the onboarding flow (wallet + SSI) can run.
-    // The login page then redirects to callbackUrl when onboarding is complete.
+    // Return to /onboarding so the wallet + SSI setup can run; it then
+    // forwards to callbackUrl once onboarding is complete.
     return res.redirect(
       302,
-      buildLoginRedirect({
+      buildOnboardingRedirect({
         hydrated: '1',
         ...(callbackUrl ? { callbackUrl } : {})
       })

@@ -6,8 +6,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import Alert from '@shared/atoms/Alert'
 import AnnouncementBanner from '@shared/AnnouncementBanner'
 import PrivacyPreferenceCenter from '../Privacy/PrivacyPreferenceCenter'
-import Header from '../Header'
-import Footer from '../Footer/Footer'
+import SiteLayout from '@shared/SiteLayout'
 import { useAccountPurgatory } from '@hooks/useAccountPurgatory'
 import { useMarketMetadata } from '@context/MarketMetadata'
 import useEnterpriseFeeCollector from '@hooks/useEnterpriseFeeCollector'
@@ -42,7 +41,6 @@ export default function App({
   const dfnsSsoReturn = useDfnsSsoReturn()
 
   const router = useRouter()
-  const isRoot = router.pathname === '/'
   const isRouterReady = router.isReady
 
   const allowedEnvAddresses = useAllowedTokenAddresses(chainId)
@@ -159,6 +157,24 @@ export default function App({
     supportedChains
   ])
 
+  // Surface auth errors (the OIDC callback redirects to /?authError=<reason>
+  // on failure, since the user isn't logged in and lands on a public page).
+  useEffect(() => {
+    if (!router.isReady) return
+    const { authError } = router.query
+    if (typeof authError !== 'string') return
+    toast.error(
+      authError === 'access_denied'
+        ? 'Access denied. Please try again.'
+        : 'Authentication failed. Please try again.'
+    )
+    const rest = { ...router.query }
+    delete rest.authError
+    router.replace({ pathname: router.pathname, query: rest }, undefined, {
+      shallow: true
+    })
+  }, [router])
+
   const handleNetworkSwitch = (targetChainId: number) => {
     switchChain({ chainId: targetChainId })
   }
@@ -168,8 +184,6 @@ export default function App({
       {siteContent?.announcement && (
         <AnnouncementBanner text={siteContent.announcement} />
       )}
-
-      {!isRoot && <Header />}
 
       <NetworkWarningModal
         chainId={chainId}
@@ -203,19 +217,19 @@ export default function App({
         </div>
       )}
 
-      {isInPurgatory && (
-        <Alert
-          title={contentPurgatory.account.title}
-          badge={`Reason: ${purgatoryData?.reason}`}
-          text={contentPurgatory.account.description}
-          state="error"
-        />
-      )}
+      {/* Single global chrome for every page: our navbar + footer. */}
+      <SiteLayout>
+        {isInPurgatory && (
+          <Alert
+            title={contentPurgatory.account.title}
+            badge={`Reason: ${purgatoryData?.reason}`}
+            text={contentPurgatory.account.description}
+            state="error"
+          />
+        )}
 
-      <main className={styles.main}>{children}</main>
-
-      {/* Home renders its own footer inside the landing scaffold */}
-      {!isRoot && <Footer />}
+        <main className={styles.main}>{children}</main>
+      </SiteLayout>
 
       <SsiWalletManager />
 

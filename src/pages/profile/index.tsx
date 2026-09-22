@@ -18,7 +18,7 @@ export default function PageProfile(): ReactElement {
     if (accountId) return
 
     router.replace(
-      `/auth/login?callbackUrl=${encodeURIComponent(router.asPath)}`
+      `/onboarding?callbackUrl=${encodeURIComponent(router.asPath)}`
     )
   }, [accountId, isConnecting, isReconnecting, router])
 

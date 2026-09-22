@@ -319,7 +319,7 @@ export const useAuth = () => {
   }, [router, setLoading, setSessionVerified, applyVerificationResult])
 
   const clearLocalSession = React.useCallback(
-    (redirectTo = '/auth/login') => {
+    (redirectTo = '/') => {
       clearOidcStorage()
       setLogoutPending(false)
       storeLogout()

@@ -16,11 +16,29 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const isPublicRoute = (): boolean => {
     const path = router.asPath.split('?')[0]
 
+    // Keep the 404 page visible to logged-out visitors. asPath is the bad URL,
+    // so match on pathname instead. A truly unmatched URL renders pathname
+    // '/404'; an unknown single-segment slug is matched by '/[slug]' (which
+    // returns notFound) and keeps that pathname while rendering the 404. The
+    // '/[slug]' route only ever serves public markdown pages or the 404, so
+    // treating it as public is safe.
+    if (
+      router.pathname === '/404' ||
+      router.pathname === '/_error' ||
+      router.pathname === '/[slug]'
+    ) {
+      return true
+    }
+
     const exactPublicPaths = [
       '/',
-      '/auth/login',
+      '/onboarding',
       '/auth/callback',
       '/about',
+      '/about-us',
+      '/projects',
+      '/the-team',
+      '/contact',
       '/terms',
       '/privacy',
       '/imprint',
@@ -84,11 +102,13 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     if (shouldRedirectToLogin) {
-      router.replace(
-        `/auth/login?callbackUrl=${encodeURIComponent(router.asPath)}`
-      )
+      // Go straight to the Authentik login flow (via the /api/auth/login OIDC
+      // redirect) instead of the intermediate market /auth/login page.
+      window.location.href = `/api/auth/login?callbackUrl=${encodeURIComponent(
+        router.asPath
+      )}`
     }
-  }, [router, router.asPath, shouldRedirectToLogin])
+  }, [router.asPath, shouldRedirectToLogin])
 
   if (!authEnabled) {
     return <>{children}</>

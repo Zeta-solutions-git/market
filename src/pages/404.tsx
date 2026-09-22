@@ -1,35 +1,43 @@
 import { ReactElement } from 'react'
+import Link from 'next/link'
 import Page from '@shared/Page'
-import Head from 'next/head'
-import Button from '@shared/atoms/Button'
-import content from '../../content/pages/404.json'
+import contentStyles from '@shared/SiteLayout/content.module.css'
 import { useRouter } from 'next/router'
 
 export default function Page404(): ReactElement {
   const router = useRouter()
-  const { title, description, actions } = content
 
   return (
-    <>
-      <Head>
-        <style type="text/css">{`
-          main {
-            text-align: center;
-          }
-        `}</style>
-      </Head>
-      <Page
-        title={title}
-        description={description}
-        uri={router.route}
-        headerCenter
+    <Page
+      title="Page not found"
+      description="The page you are looking for could not be found."
+      uri={router.route}
+      noPageHeader
+      fullWidth
+    >
+      <section
+        className={`${contentStyles.section} ${contentStyles.sectionAlt} ${contentStyles.notFound}`}
+        aria-label="Page not found"
       >
-        {actions.map((action: { title: string; url: string }) => (
-          <Button style="primary" key={action.title} to={action.url}>
-            {action.title}
-          </Button>
-        ))}
-      </Page>
-    </>
+        <div className={contentStyles.sectionInner}>
+          <div className={contentStyles.comingSoon}>
+            <span
+              className={`material-symbols-rounded ${contentStyles.comingSoonIcon}`}
+              aria-hidden="true"
+            >
+              sentiment_dissatisfied
+            </span>
+            <h1 className={contentStyles.notFoundTitle}>Page not found</h1>
+            <p className={contentStyles.comingSoonText}>
+              The page you&apos;re looking for doesn&apos;t exist or may have
+              moved.
+            </p>
+            <Link href="/" className={contentStyles.notFoundHome}>
+              Back to homepage
+            </Link>
+          </div>
+        </div>
+      </section>
+    </Page>
   )
 }

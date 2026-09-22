@@ -52,7 +52,18 @@ export async function getServerSideProps({
   params: { slug: string }
 }) {
   const page = await getPageBySlug(params.slug)
-  const content = markdownToHtmlWithToc(page?.content || '')
+
+  // Unknown slug -> render the 404 page. getPageBySlug returns a "Content Not
+  // Found" placeholder (not null) when no markdown file matches, so detect that.
+  if (
+    !page ||
+    !page.content ||
+    page.content.startsWith('# Content Not Found')
+  ) {
+    return { notFound: true }
+  }
+
+  const content = markdownToHtmlWithToc(page.content)
 
   return {
     props: { ...page, content }

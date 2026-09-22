@@ -1,0 +1,235 @@
+/* Shared marketing chrome: page wrapper + navbar + footer.
+   Used by the homepage and every standalone content page so they stay in sync.
+   Colors/fonts match the original landing scaffold. */
+
+.landing {
+  /* secondary accent for the landing pages (kept as a variable for reuse) */
+  --secondary: #316aea;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: #ffffff;
+  /* Span the full width even when the parent <main> is a flex row (the Page
+     component uses display:flex for fullWidth pages, which would otherwise
+     shrink this wrapper to its content width). */
+  width: 100%;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- HEADER ---------- */
+.nav {
+  background: #ffffff;
+  padding: 12.75px 0; /* full-width bar (15% shorter than 15px) */
+  border-bottom: 1px solid #e5e7eb; /* 1px solid bottom border */
+  /* settings cog/caret inherit these so the icon is dark on the white nav */
+  --menu-icon-fill-color: #092861;
+  --menu-icon-fill-color-hover: #1595c2;
+}
+
+.navInner {
+  position: relative;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.navLogo {
+  display: flex;
+  align-items: center;
+  color: #092861; /* wordmark (currentColor) navy on white */
+  /* trim the SVG's internal whitespace so the bar is shorter
+     without shrinking the logo itself */
+  margin: -16px 0;
+}
+
+.navLogo svg {
+  height: 6.375rem !important; /* 15% smaller (was 7.5rem) */
+  width: auto !important;
+}
+
+/* links absolutely centered in the bar, independent of logo/actions widths */
+.navLinks {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.navLink {
+  position: relative;
+  color: #092861;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 400;
+  text-decoration: none;
+}
+
+/* underline that grows in from the left on hover and retracts to the right */
+.navLink::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.25s ease;
+}
+
+.navLink:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navActions svg,
+.navActions svg path {
+  fill: #092861 !important;
+}
+
+.navActions svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* pill-shaped button (Login / Logout) — filled, like the Discover more button */
+.pillButton {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #092861;
+  background: #092861;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.pillButton:hover {
+  background: #ffffff;
+  color: #092861;
+  border-color: #092861;
+}
+
+.buttonContent {
+  display: inline-flex;
+  align-items: center;
+}
+
+.buttonText {
+  line-height: 1;
+}
+
+/* ---------- FOOTER (traditional) ---------- */
+.footer {
+  background: #0c1a3a;
+  color: #ffffff;
+  padding: 64px 0 20px;
+  margin-top: auto;
+}
+
+.footerInner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* three link columns, grouped and centered on the page */
+.footerCols {
+  display: flex;
+  justify-content: center;
+  gap: 288px;
+  padding-bottom: 48px;
+}
+
+.footerCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.footerHeading {
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.footerList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footerLink {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.footerLink:hover {
+  color: #ffffff;
+}
+
+/* under the line: logo hard-left, copyright hard-right — kept tight vertically */
+.footerBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 8px;
+}
+
+.footerLogo {
+  display: flex;
+  align-items: center;
+  /* trim the SVG's internal whitespace so the row stays short
+     without shrinking the logo itself */
+  margin: -18px 0;
+}
+
+/* whole logo rendered white for the dark footer */
+.footerLogo svg {
+  height: 5.5rem !important;
+  width: auto !important;
+}
+
+.footerLogo svg path {
+  fill: #ffffff !important;
+}
+
+.footerCopy {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+}
+
+/* ---------- responsive ---------- */
+@media screen and (max-width: 60rem) {
+  .navLinks {
+    display: none;
+  }
+}

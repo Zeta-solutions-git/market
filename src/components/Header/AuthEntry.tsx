@@ -1,5 +1,4 @@
 import { MouseEventHandler, ReactElement, ReactNode } from 'react'
-import Link from 'next/link'
 import { useAuth } from '@hooks/useAuth'
 import { useRouter } from 'next/router'
 
@@ -52,9 +51,11 @@ export default function AuthEntry({
     )
   }
 
+  // Fallback when no onLoginClick is provided: go straight to the Authentik
+  // login flow (single login entry point) via a full navigation to the API.
   return (
-    <Link className={loginClassName} href="/auth/login">
+    <a className={loginClassName} href="/api/auth/login">
       {content}
-    </Link>
+    </a>
   )
 }

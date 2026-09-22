@@ -18,7 +18,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   if (!code && !error) {
     return {
       redirect: {
-        destination: '/auth/login',
+        destination: '/',
         permanent: false
       }
     }

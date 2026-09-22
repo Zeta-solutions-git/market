@@ -52,7 +52,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       'No federated logout continuation cookie found. Redirecting to login.'
     )
     clearLogoutCookies(res)
-    return res.redirect(302, '/auth/login?loggedout=1')
+    return res.redirect(302, '/?loggedout=1')
   }
 
   const clientId = oidcClientId
@@ -63,7 +63,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       'Missing Main OIDC configuration during federated logout continuation.'
     )
     clearLogoutCookies(res)
-    return res.redirect(302, '/auth/login?loggedout=1')
+    return res.redirect(302, '/?loggedout=1')
   }
 
   const callbackUrl = `${getRequestOrigin(req)}/auth/callback/logout`

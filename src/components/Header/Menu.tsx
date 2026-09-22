@@ -92,7 +92,8 @@ export default function Menu(): ReactElement {
   }
   const handleLoginClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
-    router.push('/auth/login')
+    // Straight to the Authentik login flow (single login entry point)
+    window.location.href = '/api/auth/login'
     setIsMobileMenuOpen(false)
   }
 

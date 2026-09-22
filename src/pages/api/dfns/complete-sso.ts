@@ -35,7 +35,7 @@ export default async function handler(
   const state = getSingleQueryValue(req.query.state)
 
   if (!code || !state) {
-    return res.redirect(302, '/auth/login?dfns=missing_auth_params')
+    return res.redirect(302, '/onboarding?dfns=missing_auth_params')
   }
 
   try {
@@ -65,9 +65,9 @@ export default async function handler(
       serializeDfnsTokenCookie(data.token, DFNS_TOKEN_MAX_AGE)
     )
 
-    return res.redirect(302, '/auth/login?dfns=success')
+    return res.redirect(302, '/onboarding?dfns=success')
   } catch (error) {
     console.error('Dfns SSO completion failed:', error)
-    return res.redirect(302, '/auth/login?dfns=sso_completion_failed')
+    return res.redirect(302, '/onboarding?dfns=sso_completion_failed')
   }
 }

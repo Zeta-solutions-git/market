@@ -92,7 +92,7 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   if (!clientId || !clientSecret || !issuer) {
     console.error('Missing OIDC configuration.')
     clearAuthCookies(res)
-    return res.redirect(302, '/auth/login')
+    return res.redirect(302, '/')
   }
 
   const { access_token, refresh_token, id_token, login_source } = req.cookies
