@@ -4,12 +4,9 @@ import { useRouter } from 'next/router'
 import Logo from '@shared/atoms/Logo'
 import AuthEntry from '../../Header/AuthEntry'
 import Networks from '../../Header/UserPreferences/Networks'
-import UserPreferences from '../../Header/UserPreferences'
 import Wallet from '../../Header/Wallet'
-import { SsiWallet } from '../../Header/SsiWallet'
 import { useAuth } from '@hooks/useAuth'
 import { useMarketMetadata } from '@context/MarketMetadata'
-import appConfig from 'app.config.cjs'
 import Upload from '@images/publish.svg'
 import styles from './index.module.css'
 
@@ -130,9 +127,7 @@ function CatalogueControls(): ReactElement {
   return (
     <div className={styles.catalogueControls}>
       {validatedSupportedChains.length > 1 && <Networks />}
-      <UserPreferences />
       {showAuthedControls && <Wallet />}
-      {showAuthedControls && appConfig.ssiEnabled && <SsiWallet />}
       <Link href="/publish/1" className={styles.catalogueButton}>
         <span className={styles.buttonContent}>
           <Upload className={styles.publishIcon} />

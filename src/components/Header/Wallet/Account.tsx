@@ -1,6 +1,5 @@
 import { forwardRef, useEffect } from 'react'
 import Caret from '@images/caret.svg'
-import { accountTruncate } from '@utils/wallet'
 import styles from './Account.module.css'
 import Avatar from '@shared/atoms/Avatar'
 import { useAccount } from 'wagmi'
@@ -31,12 +30,7 @@ const Account = forwardRef<HTMLButtonElement, AccountProps>(
           }}
         >
           {accountId ? (
-            <>
-              <Avatar accountId={accountId} />
-              <span className={styles.address} title={accountId}>
-                {accountTruncate(accountId)}
-              </span>
-            </>
+            <Avatar accountId={accountId} />
           ) : (
             <span className={styles.initialLabel}>Account</span>
           )}

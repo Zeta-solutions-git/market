@@ -5,7 +5,6 @@ import Avatar from '@components/@shared/atoms/Avatar'
 import Bookmark from '@images/bookmark.svg'
 import DisconnectWallet from '@images/disconnect.svg'
 import LogoutIcon from '@images/logout.svg'
-import Copy from '@shared/atoms/Copy'
 import AddTokenList from './AddTokenList'
 import { useSsiWallet } from '@context/SsiWallet'
 import { disconnectFromWallet } from '@utils/wallet/ssiWallet'
@@ -18,11 +17,6 @@ import { clearFederatedStorage } from '@utils/logoutRouter'
 interface DetailsProps {
   onRequestClose?: () => void
   onRequestWalletChoice?: () => void
-}
-
-function formatWalletAddress(address: string): string {
-  if (!address) return ''
-  return `${address.slice(0, 8)}...${address.slice(-4)}`
 }
 
 interface MenuRowProps {
@@ -140,7 +134,7 @@ export default function Details({
   const hasMarketplaceSession = authEnabled && isAuthenticated && Boolean(user)
   const walletLabel = activeConnector?.name || 'Web3 wallet disconnected'
   const walletDescription = isWalletConnected
-    ? formatWalletAddress(accountId)
+    ? ''
     : 'Connect your web3 wallet to restore marketplace actions'
   const showTokenList =
     isWalletConnected && activeConnector?.name === 'MetaMask'
@@ -211,14 +205,7 @@ export default function Details({
       <div className={styles.section}>
         <div className={styles.walletInfo}>
           <div className={styles.walletHeading}>{walletLabel}</div>
-          {isWalletConnected ? (
-            <div className={styles.walletAddressRow}>
-              <span className={styles.walletDescription} title={accountId}>
-                {walletDescription}
-              </span>
-              <Copy text={accountId} />
-            </div>
-          ) : (
+          {!isWalletConnected && (
             <div className={styles.walletDescription}>{walletDescription}</div>
           )}
           {showTokenList && <AddTokenList disabled={!isWalletConnected} />}
