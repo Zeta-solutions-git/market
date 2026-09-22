@@ -18,28 +18,28 @@ import content from '../../../content/auth/login.json'
 // the original destination. Logging in/out no longer routes here — Authentik is
 // the single login entry point, so this page is onboarding-only.
 export default function OnboardingPage(): ReactElement {
-  const { isAuthenticated, isLoading, authEnabled } = useAuth()
+  const { isAuthenticated, isLoading, authEnabled, isLogoutPending } = useAuth()
   const { isConnected } = useAccount()
   const { sessionToken, isSsiStateHydrated } = useSsiWallet()
   const router = useRouter()
   const { callbackUrl } = router.query
   const isSsiEnabled = appConfig.ssiEnabled
 
-  // Not authenticated -> send to Authentik login (this page is post-login only)
+  // This page is post-login only. If there's no session, send the visitor to
+  // home (a public page) rather than back to Authentik login — redirecting to
+  // login here would re-auth against a still-live Authentik session and loop.
+  // Also stand down while a logout is in flight so the logout navigation wins.
   useEffect(() => {
     if (!router.isReady) return
     if (!authEnabled) {
       router.replace('/')
       return
     }
+    if (isLogoutPending) return
     if (!isLoading && !isAuthenticated) {
-      const target =
-        typeof callbackUrl === 'string' && callbackUrl ? callbackUrl : '/'
-      window.location.href = `/api/auth/login?callbackUrl=${encodeURIComponent(
-        target
-      )}`
+      router.replace('/')
     }
-  }, [router, authEnabled, isLoading, isAuthenticated, callbackUrl])
+  }, [router, authEnabled, isLoading, isAuthenticated, isLogoutPending])
 
   // Setup complete -> forward to the original destination
   useEffect(() => {
