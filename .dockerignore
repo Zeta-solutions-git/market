@@ -1,0 +1,23 @@
+# Deps + build artifacts are produced inside the image (deps stage installs
+# node_modules; next build regenerates .next), so never ship host copies —
+# they bloat the context and can overwrite in-container (musl) deps.
+node_modules
+.next
+out
+
+# VCS / tooling
+.git
+.gitignore
+.claude
+
+# Secrets: the container injects runtime config at startup from the compose
+# env_file, so .env is not needed at build time and must not be baked in.
+.env
+.env.*
+
+# Misc
+*.log
+npm-debug.log*
+.DS_Store
+Dockerfile
+.dockerignore
