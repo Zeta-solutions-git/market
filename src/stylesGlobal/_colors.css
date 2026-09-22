@@ -1,10 +1,11 @@
 :root {
-  /* Base palette */
+  /* Base palette — retuned to the Open Dataspace Lab brand (navy + bright blue)
+     so the catalogue/profile/publish/asset pages match the marketing pages. */
   --brand-white: #ffffff;
   --brand-black: #012037;
-  --brand-blue: #014f86;
-  --brand-blue-light: #2a6f97;
-  --brand-blue-lighter: #61a5c2;
+  --brand-blue: #092861; /* ODL navy (primary) */
+  --brand-blue-light: #316aea; /* ODL bright blue (accent/secondary) */
+  --brand-blue-lighter: #6f9bef; /* lighter accent tint (gradients) */
   --brand-red: #ff360d;
 
   --brand-gradient: linear-gradient(
@@ -16,7 +17,7 @@
   --brand-grey: #3d3d3d;
   --brand-grey-light: #858585;
   --brand-grey-lighter: #e0e0e0;
-  --brand-grey-dimmed: #f5f5f5;
+  --brand-grey-dimmed: #f5f7fa; /* ODL light surface */
 
   --brand-alert-green: #5fb359;
   --brand-alert-red: #ff360d;
@@ -40,14 +41,15 @@
   /* Semantic roles */
   --color-primary: var(--brand-blue);
   --color-secondary: var(--brand-blue-light);
-  --color-highlight: var(--brand-red);
+  /* links/accents use the ODL bright blue rather than Ocean's red */
+  --color-highlight: var(--brand-blue-light);
   --color-success: var(--brand-alert-green);
 
   --text-ink: #303031;
   --text-primary: #222;
   --text-neutral: #757575;
   --font-color-text: var(--brand-grey);
-  --font-color-heading: var(--brand-black);
+  --font-color-heading: #092861; /* ODL navy headings */
   --font-color-light: var(--brand-grey-light);
   --font-color-label: var(--clr-slate-70);
   --font-color-did: var(--clr-did-text);
@@ -63,7 +65,7 @@
   --box-shadow-color: rgba(0, 0, 0, 0.05);
   --modal-overlay-background: rgba(1, 32, 55, 0.45);
 
-  --primary-hover: var(--clr-navy);
+  --primary-hover: #1e50c0; /* darker ODL bright blue for hover */
   --surface-highlight: var(--surface-warning);
   --surface-warning: rgba(253, 214, 85, 0.15);
   --surface-neutral: rgba(48, 48, 49, 0.02);
@@ -71,13 +73,12 @@
 
   --gradient-primary: linear-gradient(
       115.97deg,
-      #1f2c50 0%,
-      rgba(10, 75, 112, 0.8) 27.47%,
-      rgba(10, 75, 112, 0.7) 43.49%,
-      rgba(10, 75, 112, 0.8) 55.43%,
-      #1e2e52 100%
+      #092861 0%,
+      rgba(9, 40, 97, 0.9) 27.47%,
+      rgba(49, 106, 234, 0.85) 55.43%,
+      #316aea 100%
     ),
-    #64ace0;
+    #316aea;
   --gradient-accent: linear-gradient(
       115.97deg,
       #fdd655 0%,
