@@ -42,6 +42,24 @@
   justify-content: flex-start;
 }
 
+.autoSetup {
+  flex: 1;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.autoSetupText {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--clr-navy, #0f2942);
+}
+
 .pillTab {
   flex: 1;
   padding: 12px 20px;

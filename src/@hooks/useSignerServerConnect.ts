@@ -24,6 +24,7 @@ export function useSignerServerConnect() {
   const { validatedSupportedChains } = useMarketMetadata()
   const { isAuthenticated, isSessionVerified } = useAuth()
   const [isConfigured, setIsConfigured] = useState(false)
+  const [isHealthChecked, setIsHealthChecked] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
 
   const signerServerWagmiConnector = useMemo(
@@ -47,13 +48,17 @@ export function useSignerServerConnect() {
   useEffect(() => {
     if (!isSessionVerified || !isAuthenticated) {
       setIsConfigured(false)
+      setIsHealthChecked(false)
       return
     }
 
     let cancelled = false
 
     checkSignerServerHealth().then((isHealthy) => {
-      if (!cancelled) setIsConfigured(isHealthy)
+      if (!cancelled) {
+        setIsConfigured(isHealthy)
+        setIsHealthChecked(true)
+      }
     })
 
     return () => {
@@ -109,6 +114,7 @@ export function useSignerServerConnect() {
     connect,
     openConnect,
     isConfigured,
+    isHealthChecked,
     isConnecting
   }
 }
