@@ -24,14 +24,6 @@ interface Member {
 // grayscale filter on .memberPhoto img). Add LinkedIn URLs when confirmed.
 const MEMBERS: Member[] = [
   {
-    name: 'Rob Broekman',
-    role: 'Lead Remote Sensing Data, NVWA InnovatieLab',
-    photo: '/images/team/rob.jpg',
-    light: true,
-    linkedin: '#',
-    email: 'r.j.j.a.broekman@nvwa.nl'
-  },
-  {
     name: 'Joris Krüse',
     role: 'AIC4NL',
     photo: '/images/team/joris.jpg',
@@ -58,6 +50,17 @@ const MEMBERS: Member[] = [
     photo: '/images/team/martijn.jpg',
     linkedin: '#',
     email: 'martijn.seijger@groundstation.space'
+  }
+]
+
+const ADVISORS: Member[] = [
+  {
+    name: 'Rob Broekman',
+    role: 'Lead Remote Sensing Data, NVWA InnovatieLab',
+    photo: '/images/team/rob.jpg',
+    light: true,
+    linkedin: '#',
+    email: 'r.j.j.a.broekman@nvwa.nl'
   },
   {
     name: 'Arthur Maring',
@@ -68,6 +71,44 @@ const MEMBERS: Member[] = [
     email: 'arthur.maring@rws.nl'
   }
 ]
+
+function MemberCard({ member }: { member: Member }): ReactElement {
+  return (
+    <div className={styles.memberCard}>
+      <div className={styles.memberInner}>
+        <div
+          className={`${styles.memberPhoto} ${
+            member.light ? styles.memberPhotoLight : ''
+          }`}
+        >
+          <img src={member.photo} alt={member.name} />
+        </div>
+        <div className={styles.memberBody}>
+          <div className={styles.memberInfo}>
+            <h2 className={styles.memberName}>{member.name}</h2>
+            <p className={styles.memberRole}>{member.role}</p>
+          </div>
+          <div className={styles.memberSocials}>
+            <a
+              href={member.linkedin}
+              className={styles.memberSocial}
+              aria-label={`${member.name} on LinkedIn`}
+            >
+              <LinkedInIcon />
+            </a>
+            <a
+              href={member.email ? `mailto:${member.email}` : '#'}
+              className={styles.memberSocial}
+              aria-label={`Email ${member.name}`}
+            >
+              <span className="material-symbols-rounded">mail</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function TheTeam(): ReactElement {
   return (
@@ -89,39 +130,30 @@ export default function TheTeam(): ReactElement {
         <div className={styles.sectionInner}>
           <div className={styles.teamGrid}>
             {MEMBERS.map((member, i) => (
-              <div key={i} className={styles.memberCard}>
-                <div className={styles.memberInner}>
-                  <div
-                    className={`${styles.memberPhoto} ${
-                      member.light ? styles.memberPhotoLight : ''
-                    }`}
-                  >
-                    <img src={member.photo} alt={member.name} />
-                  </div>
-                  <div className={styles.memberBody}>
-                    <div className={styles.memberInfo}>
-                      <h2 className={styles.memberName}>{member.name}</h2>
-                      <p className={styles.memberRole}>{member.role}</p>
-                    </div>
-                    <div className={styles.memberSocials}>
-                      <a
-                        href={member.linkedin}
-                        className={styles.memberSocial}
-                        aria-label={`${member.name} on LinkedIn`}
-                      >
-                        <LinkedInIcon />
-                      </a>
-                      <a
-                        href={member.email ? `mailto:${member.email}` : '#'}
-                        className={styles.memberSocial}
-                        aria-label={`Email ${member.name}`}
-                      >
-                        <span className="material-symbols-rounded">mail</span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <MemberCard key={i} member={member} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section
+        className={`${styles.banner} ${styles.bannerWhite} ${styles.bannerCenter}`}
+        aria-label="Our advisors"
+      >
+        <div className={styles.bannerInner}>
+          <h1 className={styles.bannerTitle}>Our advisors</h1>
+          <p className={styles.bannerLead}>
+            Experienced advisors from government and industry who guide our
+            mission on sovereign, trustworthy data sharing.
+          </p>
+        </div>
+      </section>
+
+      <section className={`${styles.section} ${styles.sectionAlt}`}>
+        <div className={styles.sectionInner}>
+          <div className={styles.teamGrid}>
+            {ADVISORS.map((member, i) => (
+              <MemberCard key={i} member={member} />
             ))}
           </div>
         </div>

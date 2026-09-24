@@ -230,6 +230,16 @@ function SiteFooter(): ReactElement {
             </div>
           ))}
         </div>
+        <div className={styles.footerFunding}>
+          <img
+            src="/images/pzh-logo.png"
+            alt="Provincie Zuid-Holland"
+            className={styles.fundingLogo}
+          />
+          <span className={styles.fundingText}>
+            Co-financed by Provincie South-Holland
+          </span>
+        </div>
         <div className={styles.footerBottom}>
           <Link
             href="/"

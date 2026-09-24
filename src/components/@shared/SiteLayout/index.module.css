@@ -259,6 +259,26 @@
 }
 
 /* under the line: logo hard-left, copyright hard-right — kept tight vertically */
+.footerFunding {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0 24px;
+}
+
+.fundingLogo {
+  height: 42px;
+  width: auto;
+  /* logo art is dark on transparent, so render it white for the dark footer */
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
+.fundingText {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
 .footerBottom {
   display: flex;
   align-items: center;
