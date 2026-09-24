@@ -230,16 +230,6 @@ function SiteFooter(): ReactElement {
             </div>
           ))}
         </div>
-        <div className={styles.footerFunding}>
-          <img
-            src="/images/pzh-logo.png"
-            alt="Provincie Zuid-Holland"
-            className={styles.fundingLogo}
-          />
-          <span className={styles.fundingText}>
-            Co-financed by Provincie South-Holland
-          </span>
-        </div>
         <div className={styles.footerBottom}>
           <Link
             href="/"
@@ -248,6 +238,16 @@ function SiteFooter(): ReactElement {
           >
             <Logo />
           </Link>
+          <div className={styles.footerFunding}>
+            <img
+              src="/images/pzh-logo.png"
+              alt="Provincie Zuid-Holland"
+              className={styles.fundingLogo}
+            />
+            <span className={styles.footerCopy}>
+              Co-financed by Provincie Zuid-Holland
+            </span>
+          </div>
           <span className={styles.footerCopy}>
             © 2026 OpenDataSpace. All rights reserved.
           </span>
