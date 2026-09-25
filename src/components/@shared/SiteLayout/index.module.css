@@ -259,60 +259,57 @@
 }
 
 /* under the line: logo hard-left, copyright hard-right — kept tight vertically */
-/* 3-column grid: ODL logo | co-financing (truly centered) | copyright */
+/* Two groups, each [logo + text]: ODL + copyright left, PZH co-financing right */
 .footerBottom {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  --footer-logo-h: 2.75rem; /* shared by the ODL and PZH logos (small, ~40px visible) */
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   padding-top: 8px;
 }
 
-.footerBottom > .footerCopy {
-  justify-self: end;
-}
-
-.footerFunding {
+.footerGroup {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
 }
 
-/* Match the ODL logo's visible height: its SVG box is 5.5rem but the mark fills
-   61/66 of the viewBox, while this PNG is trimmed. Negative margins mirror
-   .footerLogo so the row doesn't get taller. */
+/* Match the ODL logo's visible height: the ODL mark fills 61/66 of its SVG box,
+   while this PNG is trimmed to the artwork. */
 .fundingLogo {
-  height: calc(5.5rem * 61 / 66);
+  height: calc(var(--footer-logo-h) * 61 / 66);
   width: auto;
-  margin: -15px 0;
+  max-width: none;
+  flex-shrink: 0;
+  margin: 0;
   /* logo art is dark on transparent, so render it white for the dark footer */
   filter: brightness(0) invert(1);
 }
 
-@media (max-width: 720px) {
+/* Stack the two groups on narrow screens instead of squeezing them. */
+@media (max-width: 860px) {
   .footerBottom {
-    grid-template-columns: 1fr;
-    justify-items: center;
-  }
-
-  .footerBottom > .footerCopy {
-    justify-self: center;
+    flex-direction: column;
+    align-items: center;
   }
 }
 
 .footerLogo {
   display: flex;
   align-items: center;
-  /* trim the SVG's internal whitespace so the row stays short
-     without shrinking the logo itself */
-  margin: -18px 0;
+  margin: 0;
 }
 
-/* whole logo rendered white for the dark footer */
+/* Fixed box at the logo's own 198:66 ratio. The global `svg { max-width: 100% }`
+   rule would otherwise let a narrow grid column squeeze the width, so the
+   rendered size would change with the window width. */
 .footerLogo svg {
-  height: 5.5rem !important;
-  width: auto !important;
+  height: var(--footer-logo-h, 2.75rem) !important;
+  width: calc(var(--footer-logo-h, 2.75rem) * 198 / 66) !important;
+  max-width: none !important;
+  flex-shrink: 0;
 }
 
 .footerLogo svg path {

@@ -231,14 +231,19 @@ function SiteFooter(): ReactElement {
           ))}
         </div>
         <div className={styles.footerBottom}>
-          <Link
-            href="/"
-            className={styles.footerLogo}
-            aria-label="OpenDataSpace home"
-          >
-            <Logo />
-          </Link>
-          <div className={styles.footerFunding}>
+          <div className={styles.footerGroup}>
+            <Link
+              href="/"
+              className={styles.footerLogo}
+              aria-label="OpenDataSpace home"
+            >
+              <Logo />
+            </Link>
+            <span className={styles.footerCopy}>
+              © 2026 OpenDataSpace. All rights reserved.
+            </span>
+          </div>
+          <div className={styles.footerGroup}>
             <img
               src="/images/pzh-logo.png"
               alt="Provincie Zuid-Holland"
@@ -248,9 +253,6 @@ function SiteFooter(): ReactElement {
               Co-financed by Provincie Zuid-Holland
             </span>
           </div>
-          <span className={styles.footerCopy}>
-            © 2026 OpenDataSpace. All rights reserved.
-          </span>
         </div>
       </div>
     </footer>
