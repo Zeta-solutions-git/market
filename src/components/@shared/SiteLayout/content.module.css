@@ -131,6 +131,53 @@
   text-decoration: underline;
 }
 
+/* ---------- signup submitted: progress steps ---------- */
+.signupSteps {
+  list-style: none;
+  margin: 12px 0 4px;
+  padding: 24px 28px;
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(9, 40, 97, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: left;
+}
+
+.signupStep {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.signupStepIcon {
+  font-size: 24px;
+  line-height: 1;
+  flex-shrink: 0;
+  color: #9aa5b8;
+}
+
+.signupStepDone .signupStepIcon {
+  color: var(--secondary);
+}
+
+.signupStepTitle {
+  display: block;
+  color: #092861;
+  font-weight: 600;
+}
+
+.signupStepText {
+  display: block;
+  color: #52607a;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
 /* ---------- generic content section ---------- */
 .section {
   padding: 72px 0;
