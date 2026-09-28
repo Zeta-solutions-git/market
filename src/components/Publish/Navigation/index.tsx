@@ -15,6 +15,9 @@ export default function Navigation(): ReactElement {
 
   const { getSuccessClass, getLastCompletedStep } = useStepCompletion()
 
+  // Step 5 (additional asset descriptions) can be skipped.
+  const OPTIONAL_STEPS = new Set([5])
+
   function handleStepClick(step: number) {
     router.push(`/publish/${step}`)
   }
@@ -39,13 +42,27 @@ export default function Navigation(): ReactElement {
   const currentStep = values.user.stepCurrent
   const lastCompletedStep = getLastCompletedStep(wizardSteps.length)
   const progressTargetIdx = Math.min(lastCompletedStep + 1, wizardSteps.length)
+  // Go back to any step freely; forward only up to the first unfinished step.
+  const maxReachableStep = Math.max(progressTargetIdx, currentStep)
+  const current = wizardSteps.find((s) => s.step === currentStep)
 
   const { stepRefs, stepsRowRef, progressBarWidth } = useProgressBar({
     progressTargetIdx
   })
 
   return (
-    <nav className={styles.navigation}>
+    <nav className={styles.navigation} aria-label="Publish steps">
+      <p className={styles.stepCounter}>
+        Step {currentStep} of {wizardSteps.length}
+        {current && (
+          <>
+            : <strong>{current.title}</strong>
+            {OPTIONAL_STEPS.has(currentStep) && (
+              <span className={styles.optional}> (optional)</span>
+            )}
+          </>
+        )}
+      </p>
       <div className={styles.stepsRow} ref={stepsRowRef}>
         <div
           className={styles.progressBar}
@@ -55,16 +72,19 @@ export default function Navigation(): ReactElement {
         {wizardSteps.map((step) => {
           const isActive = step.step === currentStep
           const isCompleted = getSuccessClass(step.step)
+          const isLocked = step.step > maxReachableStep
           return (
             <div
               key={step.step}
               className={`${styles.step} ${
                 isActive ? styles.activeStep : styles.inactiveStep
-              }`}
-              onClick={() => handleStepClick(step.step)}
-              onKeyDown={(e) => handleKeyDown(e, step.step)}
+              } ${isLocked ? styles.locked : ''}`}
+              onClick={() => !isLocked && handleStepClick(step.step)}
+              onKeyDown={(e) => !isLocked && handleKeyDown(e, step.step)}
               role="button"
-              tabIndex={0}
+              tabIndex={isLocked ? -1 : 0}
+              aria-disabled={isLocked || undefined}
+              title={isLocked ? 'Complete the earlier steps first' : undefined}
               aria-current={isActive ? 'step' : undefined}
               aria-label={`Step ${step.step}: ${step.title}${
                 isCompleted ? ' (completed)' : ''

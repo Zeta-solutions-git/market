@@ -335,6 +335,8 @@ export default function PublishPage({
           <Form className={styles.form} ref={scrollToRef}>
             <Navigation />
             <ContainerForm style="accent">
+              {/* "Before you can continue" summary renders here (Actions) */}
+              <div id="publish-error-summary" />
               <Steps feedback={feedback} />
               <Actions scrollToRef={scrollToRef} did={did} />
             </ContainerForm>

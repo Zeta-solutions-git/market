@@ -1,7 +1,19 @@
-import { FormEvent, ReactElement, RefObject } from 'react'
+import {
+  FormEvent,
+  ReactElement,
+  RefObject,
+  useEffect,
+  useRef,
+  useState
+} from 'react'
+import { createPortal } from 'react-dom'
 import Button from '@shared/atoms/Button'
 import styles from './index.module.css'
-import { FormikContextType, useFormikContext } from 'formik'
+import {
+  FormikContextType,
+  setNestedObjectValues,
+  useFormikContext
+} from 'formik'
 import { FormPublishData } from '../_types'
 import { wizardSteps } from '../_constants'
 import SuccessConfetti from '@shared/SuccessConfetti'
@@ -14,6 +26,63 @@ import useNetworkMetadata from '@hooks/useNetworkMetadata'
 import { isAddress } from 'ethers'
 import isUrl from 'is-url-superb'
 import { isPrimaryLicenseReady } from '../_license'
+
+interface StepProblem {
+  message: string
+  field?: string // formik field path to focus
+  step?: number // earlier step to go back to
+}
+
+// Formik section per wizard step (errors under this key block Continue).
+const STEP_SECTION: Record<number, keyof FormPublishData> = {
+  1: 'metadata',
+  2: 'credentials',
+  3: 'services',
+  4: 'pricing',
+  5: 'additionalDdos'
+}
+
+function humanize(path: string): string {
+  const last =
+    path
+      .split(/[.[\]]/)
+      .filter((part) => part && !/^\d+$/.test(part))
+      .pop() || path
+  const words = last.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()
+  return words.charAt(0).toUpperCase() + words.slice(1)
+}
+
+// Nested formik errors -> [{ field: 'services[0].files[0].url', message }]
+function flattenErrors(value: unknown, path: string): StepProblem[] {
+  if (!value) return []
+  if (typeof value === 'string') {
+    const label = humanize(path)
+    const message = /^required\.?$/i.test(value.trim())
+      ? `${label} is required.`
+      : value.toLowerCase().includes(label.toLowerCase())
+      ? value
+      : `${label}: ${value}`
+    return [{ field: path, message }]
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap((item, i) => flattenErrors(item, `${path}[${i}]`))
+  }
+  if (typeof value === 'object') {
+    return Object.entries(value as Record<string, unknown>).flatMap(
+      ([key, item]) => flattenErrors(item, `${path}.${key}`)
+    )
+  }
+  return []
+}
+
+function focusField(field: string) {
+  const el =
+    document.querySelector<HTMLElement>(`[name="${field}"]`) ||
+    document.getElementById(field)
+  if (!el) return
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  el.focus({ preventScroll: true })
+}
 
 function isValidUrl(url: string): boolean {
   if (!url?.trim()) return false
@@ -40,8 +109,13 @@ export default function Actions({
     errors,
     isValid,
     isSubmitting,
+    touched,
+    setTouched,
     setFieldValue
   }: FormikContextType<FormPublishData> = useFormikContext()
+  const [showSummary, setShowSummary] = useState(false)
+  const [summaryTarget, setSummaryTarget] = useState<HTMLElement | null>(null)
+  const summaryRef = useRef<HTMLDivElement>(null)
   // async function handleActivation(e: FormEvent<HTMLButtonElement>) {
   //   // prevent accidentially submitting a form the button might be in
   //   e.preventDefault()
@@ -56,63 +130,6 @@ export default function Actions({
       query: { step: parseInt(currentStep) + (action === 'next' ? +1 : -1) }
     })
     scrollToRef.current.scrollIntoView()
-  }
-
-  function handleNext(e: FormEvent) {
-    e.preventDefault()
-
-    const { stepCurrent } = values.user
-    const stepCompletions = {
-      1: ['step1Completed'],
-      2: ['step2Completed'],
-      3: ['step3Completed'],
-      4: ['step4Completed'],
-      5: ['step5Completed'],
-      6: ['step6Completed', 'previewPageVisited'],
-      7: ['submissionPageVisited']
-    }
-
-    const fieldsToSet = stepCompletions[stepCurrent] || []
-    fieldsToSet.forEach((field) => setFieldValue(field, true))
-
-    if (values.user.stepCurrent === 2) {
-      const processAddress = (
-        inputValue: string,
-        fieldName: 'allow' | 'deny'
-      ) => {
-        const trimmedValue = inputValue?.trim()
-        if (
-          !trimmedValue ||
-          trimmedValue.length < 40 ||
-          !trimmedValue.startsWith('0x')
-        ) {
-          return
-        }
-
-        try {
-          if (isAddress(trimmedValue)) {
-            const lowerCaseAddress = trimmedValue.toLowerCase()
-            const currentList = values.credentials[fieldName] || []
-
-            if (!currentList.includes(lowerCaseAddress)) {
-              const newList = [...currentList, lowerCaseAddress]
-              setFieldValue(`credentials.${fieldName}`, newList)
-              setFieldValue(`credentials.${fieldName}InputValue`, '')
-            }
-          }
-        } catch (error) {
-          console.error(
-            `${fieldName} address validation error during auto-commit:`,
-            error
-          )
-        }
-      }
-
-      processAddress(values.credentials.allowInputValue, 'allow')
-      processAddress(values.credentials.denyInputValue, 'deny')
-    }
-
-    handleAction('next')
   }
 
   function handlePrevious(e: FormEvent) {
@@ -193,48 +210,175 @@ export default function Actions({
     })
   }
 
-  const isContinueDisabled = (() => {
+  // Why the current step can't continue yet, in plain language. Continue
+  // stays clickable; clicking it shows these in a summary (instead of a
+  // silently disabled button).
+  const stepProblems: StepProblem[] = (() => {
     const { stepCurrent } = values.user
-    const {
-      step1Completed,
-      step2Completed,
-      step3Completed,
-      step4Completed,
-      step5Completed
-    } = values
+    const problems: StepProblem[] = []
+    const completed = [
+      values.step1Completed,
+      values.step2Completed,
+      values.step3Completed,
+      values.step4Completed,
+      values.step5Completed
+    ]
+    // earlier steps that were never finished
+    for (let n = 1; n < Math.min(stepCurrent, 6); n++) {
+      if (!completed[n - 1]) {
+        problems.push({
+          message: `Complete step ${n} (${wizardSteps[n - 1].title}) first.`,
+          step: n
+        })
+      }
+    }
+    const section = STEP_SECTION[stepCurrent]
+    if (section) problems.push(...flattenErrors(errors[section], section))
 
-    const stepValidations = {
-      1: () =>
-        errors.metadata !== undefined ||
-        !isPrimaryLicenseReady(values.metadata),
-      2: () =>
-        !step1Completed ||
-        errors.credentials !== undefined ||
-        !hasValidAllowAddress() ||
-        hasSSIButNoCredentialRequests(),
-      3: () =>
-        !step1Completed || !step2Completed || errors.services !== undefined,
-      4: () =>
-        !step1Completed ||
-        !step2Completed ||
-        !step3Completed ||
-        errors.pricing !== undefined,
-      5: () =>
-        !step1Completed ||
-        !step2Completed ||
-        !step3Completed ||
-        !step4Completed ||
-        errors.additionalDdos !== undefined,
-      6: () =>
-        !step1Completed ||
-        !step2Completed ||
-        !step3Completed ||
-        !step4Completed ||
-        !step5Completed
+    if (stepCurrent === 1 && !isPrimaryLicenseReady(values.metadata)) {
+      problems.push({
+        message:
+          'Add a licence: enter a valid licence URL or upload a licence file.'
+      })
+    }
+    if (stepCurrent === 2) {
+      if (!hasValidAllowAddress()) {
+        problems.push({
+          message:
+            'Add at least one wallet address to the allow list (use * to allow everyone).',
+          field: 'credentials.allowInputValue'
+        })
+      }
+      if (hasSSIButNoCredentialRequests()) {
+        problems.push({
+          message:
+            'SSI access control is on: add at least one credential requirement and fill in its policy, or turn SSI access control off.'
+        })
+      }
+    }
+    return problems
+  })()
+
+  function handleNext(e: FormEvent) {
+    e.preventDefault()
+
+    if (stepProblems.length > 0) {
+      const section = STEP_SECTION[values.user.stepCurrent]
+      if (section && errors[section]) {
+        setTouched(
+          {
+            ...touched,
+            ...setNestedObjectValues({ [section]: errors[section] }, true)
+          },
+          false
+        )
+      }
+      setShowSummary(true)
+      // focus after render so screen readers announce the summary
+      setTimeout(() => summaryRef.current?.focus(), 0)
+      return
+    }
+    setShowSummary(false)
+
+    const { stepCurrent } = values.user
+    const stepCompletions = {
+      1: ['step1Completed'],
+      2: ['step2Completed'],
+      3: ['step3Completed'],
+      4: ['step4Completed'],
+      5: ['step5Completed'],
+      6: ['step6Completed', 'previewPageVisited'],
+      7: ['submissionPageVisited']
     }
 
-    return stepValidations[stepCurrent]?.() || false
-  })()
+    const fieldsToSet = stepCompletions[stepCurrent] || []
+    fieldsToSet.forEach((field) => setFieldValue(field, true))
+
+    if (values.user.stepCurrent === 2) {
+      const processAddress = (
+        inputValue: string,
+        fieldName: 'allow' | 'deny'
+      ) => {
+        const trimmedValue = inputValue?.trim()
+        if (
+          !trimmedValue ||
+          trimmedValue.length < 40 ||
+          !trimmedValue.startsWith('0x')
+        ) {
+          return
+        }
+
+        try {
+          if (isAddress(trimmedValue)) {
+            const lowerCaseAddress = trimmedValue.toLowerCase()
+            const currentList = values.credentials[fieldName] || []
+
+            if (!currentList.includes(lowerCaseAddress)) {
+              const newList = [...currentList, lowerCaseAddress]
+              setFieldValue(`credentials.${fieldName}`, newList)
+              setFieldValue(`credentials.${fieldName}InputValue`, '')
+            }
+          }
+        } catch (error) {
+          console.error(
+            `${fieldName} address validation error during auto-commit:`,
+            error
+          )
+        }
+      }
+
+      processAddress(values.credentials.allowInputValue, 'allow')
+      processAddress(values.credentials.denyInputValue, 'deny')
+    }
+
+    handleAction('next')
+  }
+
+  // Summary lives at the top of the step (mount point in Publish/index.tsx).
+  useEffect(() => {
+    setSummaryTarget(document.getElementById('publish-error-summary'))
+  }, [])
+  // New step: start without a summary.
+  useEffect(() => {
+    setShowSummary(false)
+  }, [values.user.stepCurrent])
+
+  const nextStepTitle = wizardSteps[values.user.stepCurrent]?.title
+  const summary =
+    showSummary && stepProblems.length > 0 ? (
+      <div
+        className={styles.errorSummary}
+        ref={summaryRef}
+        tabIndex={-1}
+        role="alert"
+        aria-labelledby="publish-error-summary-title"
+      >
+        <h3 id="publish-error-summary-title" className={styles.errorTitle}>
+          Before you can continue
+        </h3>
+        <ul className={styles.errorList}>
+          {stepProblems.map((problem, i) => (
+            <li key={`${problem.field || problem.step || 'p'}-${i}`}>
+              {problem.field || problem.step ? (
+                <button
+                  type="button"
+                  className={styles.errorLink}
+                  onClick={() =>
+                    problem.field
+                      ? focusField(problem.field)
+                      : router.push(`/publish/${problem.step}`)
+                  }
+                >
+                  {problem.message}
+                </button>
+              ) : (
+                problem.message
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : null
 
   const hasSubmitError = [1, 2, 3].some(
     (index) => values.feedback?.[index]?.status === 'error'
@@ -245,6 +389,7 @@ export default function Actions({
 
   return (
     <footer className={actionsClassName}>
+      {summary && summaryTarget && createPortal(summary, summaryTarget)}
       {did ? (
         <SuccessConfetti
           className={styles.successConfettiWrapper}
@@ -264,12 +409,8 @@ export default function Actions({
           )}
 
           {values.user.stepCurrent < wizardSteps.length ? (
-            <Button
-              style="accent"
-              onClick={handleNext}
-              disabled={isContinueDisabled}
-            >
-              Continue
+            <Button style="accent" onClick={handleNext} disabled={isSubmitting}>
+              {nextStepTitle ? `Continue to ${nextStepTitle}` : 'Continue'}
             </Button>
           ) : // !address ? (
           // <Button type="submit" style="primary" onClick={handleActivation}>
@@ -296,9 +437,9 @@ export default function Actions({
               {isSubmitting ? (
                 <Loader variant="primary" />
               ) : hasSubmitError ? (
-                'Retry'
+                'Try again'
               ) : (
-                'Submit'
+                'Publish asset'
               )}
             </Button>
           )}

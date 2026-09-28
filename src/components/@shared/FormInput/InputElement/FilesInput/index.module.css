@@ -95,7 +95,7 @@
   border-radius: 20px;
   border: 1px solid var(--border-navy-soft);
   background: var(--clr-amber);
-  color: var(--clr-navy);
+  color: #ffffff;
   font-family: var(--font-family-base);
   font-weight: var(--text-weight-bold);
   font-size: var(--text-sm);

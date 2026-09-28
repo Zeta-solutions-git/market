@@ -7,12 +7,7 @@
   --brand-blue-light: #316aea; /* ODL bright blue (accent/secondary) */
   --brand-blue-lighter: #6f9bef; /* lighter accent tint (gradients) */
   --brand-red: #ff360d;
-
-  --brand-gradient: linear-gradient(
-    to right bottom,
-    var(--brand-blue),
-    var(--brand-blue-lighter)
-  );
+  --brand-gradient: var(--brand-blue) /* solid: ODL uses no gradients */;
 
   --brand-grey: #3d3d3d;
   --brand-grey-light: #858585;
@@ -28,10 +23,10 @@
   --ocean-pink: #ff4092;
   --ocean-violet: #e000cf;
   --ocean-blue: #4ca3d3;
-  --ocean-orange-color: #fdd655;
+  --ocean-orange-color: #316aea /* was Ocean yellow; ODL bright blue */;
 
   --clr-navy: #0a4b70;
-  --clr-amber: #fdd655;
+  --clr-amber: #316aea /* was #fdd655 yellow; ODL bright blue accent */;
   --clr-teal: #00adb2;
   --clr-slate-70: rgba(48, 48, 49, 0.7);
   --clr-slate-50: rgba(48, 48, 49, 0.5);
@@ -66,28 +61,13 @@
   --modal-overlay-background: rgba(1, 32, 55, 0.45);
 
   --primary-hover: #1e50c0; /* darker ODL bright blue for hover */
-  --surface-highlight: var(--surface-warning);
+  --surface-highlight: #f5f7fa /* was yellow-tinted; neutral ODL surface */;
   --surface-warning: rgba(253, 214, 85, 0.15);
   --surface-neutral: rgba(48, 48, 49, 0.02);
   --surface-hover: rgba(10, 75, 112, 0.04);
-
-  --gradient-primary: linear-gradient(
-      115.97deg,
-      #092861 0%,
-      rgba(9, 40, 97, 0.9) 27.47%,
-      rgba(49, 106, 234, 0.85) 55.43%,
-      #316aea 100%
-    ),
-    #316aea;
-  --gradient-accent: linear-gradient(
-      115.97deg,
-      #fdd655 0%,
-      rgba(253, 214, 85, 0.8) 27.47%,
-      rgba(253, 214, 85, 0.7) 43.49%,
-      rgba(253, 214, 85, 0.8) 55.43%,
-      #fdd655 100%
-    ),
-    linear-gradient(0deg, #fdd655, #fdd655), #ffffff;
+  --gradient-primary: #092861 /* solid ODL navy (no gradients) */;
+  --gradient-accent: #eaf0fd
+    /* light ODL blue tint (was a yellow gradient); keeps navy text readable */;
 
   /* Component tokens */
   --checkbox-selected-background: var(--ocean-orange-color);

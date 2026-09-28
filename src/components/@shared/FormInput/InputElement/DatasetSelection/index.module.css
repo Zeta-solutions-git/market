@@ -28,12 +28,12 @@
 }
 
 .scroll::-webkit-scrollbar-thumb {
-  background: #fdd655;
+  background: var(--brand-blue-light);
   border-radius: 4px;
 }
 
 .scroll::-webkit-scrollbar-thumb:hover {
-  background: var(--yellow-600);
+  background: #1e50c0;
 }
 
 .datasetCard {
@@ -217,7 +217,7 @@
 
 .selectedTag {
   background: var(--clr-amber);
-  color: var(--clr-navy);
+  color: #ffffff;
   border-radius: var(--radius-xl);
   padding: 2px 8px;
   font-family: var(--font-family-base);

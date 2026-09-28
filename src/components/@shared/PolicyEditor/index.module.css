@@ -195,7 +195,7 @@
 
 /* Default policies section styling */
 .defaultPoliciesSection {
-  background: var(--yellow-alpha-10);
+  background: rgba(49, 106, 234, 0.08);
   border: 1px solid var(--clr-amber);
   border-radius: var(--radius-xl);
   padding: var(--sp-6);

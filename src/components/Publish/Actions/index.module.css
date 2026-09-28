@@ -57,3 +57,47 @@
   align-items: center;
   gap: var(--sp-2);
 }
+
+/* "Before you can continue" error summary (shown at the top of the step) */
+.errorSummary {
+  margin: 0 0 20px;
+  padding: 14px 18px;
+  border: 1px solid #f1c4bf;
+  border-left: 4px solid #b42318;
+  border-radius: 6px;
+  background: #fdf3f2;
+  outline: none;
+}
+
+.errorSummary:focus-visible {
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.25);
+}
+
+.errorTitle {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: #b42318;
+}
+
+.errorList {
+  margin: 0;
+  padding-left: 18px;
+  color: #092861;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.errorList li + li {
+  margin-top: 4px;
+}
+
+.errorLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #b42318;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+}
