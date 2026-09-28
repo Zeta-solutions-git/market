@@ -138,7 +138,12 @@ export default async function handler(
         username:
           getOptionalStringClaim(payload, 'preferred_username') ||
           getOptionalStringClaim(payload, 'username'),
-        organizationId
+        organizationId,
+        // oe-profile scope (profile page / account menu); empty for old sessions
+        firstName: getOptionalStringClaim(payload, 'given_name'),
+        lastName: getOptionalStringClaim(payload, 'family_name'),
+        company: getOptionalStringClaim(payload, 'company'),
+        memberSince: getOptionalStringClaim(payload, 'member_since')
       },
       authMeta,
       has_refresh_token: Boolean(refreshToken),

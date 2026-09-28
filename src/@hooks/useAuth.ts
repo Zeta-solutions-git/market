@@ -19,6 +19,10 @@ type SessionResponse = {
     name?: string
     username?: string
     organizationId?: string
+    firstName?: string
+    lastName?: string
+    company?: string
+    memberSince?: string
   }
   authMeta?: Record<string, unknown>
   expires_in?: number
@@ -44,6 +48,10 @@ const getUserDataFromSessionResponse = (user: {
   name?: string
   username?: string
   organizationId?: string
+  firstName?: string
+  lastName?: string
+  company?: string
+  memberSince?: string
 }): User => {
   return {
     id: user.id || '',
@@ -51,6 +59,10 @@ const getUserDataFromSessionResponse = (user: {
     name: user.name || '',
     username: user.username,
     organizationId: user.organizationId,
+    firstName: user.firstName || undefined,
+    lastName: user.lastName || undefined,
+    company: user.company || undefined,
+    memberSince: user.memberSince || undefined,
     avatar: `https://ui-avatars.com/api/?name=${user.name || ''}`,
     isOnboarded: false,
     authProvider: 'oidc'

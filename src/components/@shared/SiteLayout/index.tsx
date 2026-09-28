@@ -4,10 +4,10 @@ import { useRouter } from 'next/router'
 import Logo from '@shared/atoms/Logo'
 import AuthEntry from '../../Header/AuthEntry'
 import Networks from '../../Header/UserPreferences/Networks'
-import Wallet from '../../Header/Wallet'
 import { useAuth } from '@hooks/useAuth'
 import { useMarketMetadata } from '@context/MarketMetadata'
 import Upload from '@images/publish.svg'
+import AccountMenu from './AccountMenu'
 import styles from './index.module.css'
 
 const CATALOGUE_HREF = '/search?sort=indexedMetadata.event.block&sortOrder=desc'
@@ -52,21 +52,6 @@ const FOOTER_COLS = [
     ]
   }
 ]
-
-function LogoutButton(): ReactElement {
-  const { logout } = useAuth()
-  return (
-    <button
-      type="button"
-      className={styles.pillButton}
-      onClick={() => logout()}
-    >
-      <span className={styles.buttonContent}>
-        <span className={styles.buttonText}>Logout</span>
-      </span>
-    </button>
-  )
-}
 
 // Bright-blue boxed "Catalogue" CTA. When logged in it links straight to the
 // catalogue; when logged out it kicks off the Authentik login flow (the
@@ -116,8 +101,7 @@ function SignupLink(): ReactElement {
 }
 
 // The functional marketplace controls that replace the marketing nav links on
-// the catalogue page (chain switcher, preferences incl. list/grid view toggle,
-// wallet/account menu with profile/bookmarks/sign-out, SSI wallet, publish).
+// the catalogue page (chain switcher, account menu, publish).
 function CatalogueControls(): ReactElement {
   const { validatedSupportedChains } = useMarketMetadata()
   const { isAuthenticated, authEnabled, beginOidcFlow } = useAuth()
@@ -127,7 +111,7 @@ function CatalogueControls(): ReactElement {
   return (
     <div className={styles.catalogueControls}>
       {validatedSupportedChains.length > 1 && <Networks />}
-      {showAuthedControls && <Wallet />}
+      {showAuthedControls && <AccountMenu />}
       <Link href="/publish/1" className={styles.catalogueButton}>
         <span className={styles.buttonContent}>
           <Upload className={styles.publishIcon} />
@@ -193,7 +177,7 @@ function Nav(): ReactElement {
                   to the Authentik enrollment flow. */}
               <CatalogueButton />
               <AuthEntry
-                authenticatedContent={<LogoutButton />}
+                authenticatedContent={<AccountMenu />}
                 loginClassName={styles.pillButton}
                 buttonContentClassName={styles.buttonContent}
                 buttonTextClassName={styles.buttonText}

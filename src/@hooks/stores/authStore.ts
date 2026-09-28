@@ -7,6 +7,10 @@ export interface User {
   username?: string
   avatar?: string
   organizationId?: string
+  firstName?: string
+  lastName?: string
+  company?: string
+  memberSince?: string
   walletAddress?: string
   isOnboarded: boolean
   authProvider: 'oidc'
