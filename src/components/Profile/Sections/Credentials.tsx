@@ -8,7 +8,6 @@ import {
   getWalletCredentials,
   getWalletDids
 } from '@utils/wallet/ssiWallet'
-import { getRuntimeConfig } from '@utils/runtimeConfig'
 import { SsiVerifiableCredential, SsiWalletDid } from 'src/@types/SsiWallet'
 import styles from './Sections.module.css'
 
@@ -50,7 +49,6 @@ export default function CredentialsSection(): ReactElement {
   const [credentials, setCredentials] = useState<SsiVerifiableCredential[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const ssiUiUrl = getRuntimeConfig().NEXT_PUBLIC_SSI_UI_URL
 
   useEffect(() => {
     if (!sessionToken?.token || !selectedWallet?.id) return
@@ -109,16 +107,8 @@ export default function CredentialsSection(): ReactElement {
           </div>
         ) : (
           <p className={styles.cardText}>
-            Protected assets check these credentials before you can access them.
-            {ssiUiUrl && (
-              <>
-                {' '}
-                <a href={ssiUiUrl} target="_blank" rel="noopener noreferrer">
-                  Open the full credentials wallet
-                </a>
-                .
-              </>
-            )}
+            Your identity (DID) signs the assets you publish, and protected
+            assets check these credentials before you can access them.
           </p>
         )}
       </div>
