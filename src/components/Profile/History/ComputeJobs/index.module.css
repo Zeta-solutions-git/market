@@ -8,11 +8,18 @@
   align-items: center;
 }
 
-.refresh,
-.refresh:first-child {
+/* Pin layout in every state. The Button atom's `.text:hover/:focus/:active`
+   sets display:inline-block, which broke the auto-margin positioning: the
+   button jumped out from under the cursor, lost hover, jumped back (flicker).
+   `button.refresh` outranks `.text:hover`. */
+button.refresh,
+button.refresh:first-child,
+button.refresh:hover,
+button.refresh:focus,
+button.refresh:active {
   margin-bottom: calc(var(--spacer) / 2);
   margin-left: auto;
-  margin-right: auto;
+  margin-right: 0;
   display: block;
 }
 
