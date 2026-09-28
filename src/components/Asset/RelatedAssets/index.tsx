@@ -111,6 +111,9 @@ export default function RelatedAssets(): ReactElement {
     newCancelToken
   ])
 
+  // nothing related: leave the section out instead of an empty-state box
+  if (isLoading === false && !relatedAssets?.length) return null
+
   return (
     <section className={styles.section}>
       <h3>Related Assets</h3>

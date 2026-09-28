@@ -2,8 +2,6 @@ import { ReactNode, ReactElement } from 'react'
 import PageHeader from './PageHeader'
 import Seo from './Seo'
 import Container from '@shared/atoms/Container'
-import { useUserPreferences } from '@context/UserPreferences'
-import ExternalContentWarning from '../ExternalContentWarning'
 import styles from './index.module.css'
 
 interface PageProps {
@@ -25,11 +23,8 @@ export default function Page({
   headerCenter,
   fullWidth
 }: PageProps): ReactElement {
-  const { allowExternalContent } = useUserPreferences()
-
   const isHome = uri === '/'
   // const isSearchPage = uri.startsWith('/search')
-  const isAssetPage = uri.startsWith('/asset')
   const mainStyle = fullWidth
     ? { display: 'flex', flex: 1, minHeight: 0 }
     : undefined
@@ -45,7 +40,8 @@ export default function Page({
             placeholder="Search for service offerings"
             isSearchPage={isSearchPage}
           /> */}
-          {isAssetPage && !allowExternalContent && <ExternalContentWarning />}
+          {/* asset pages show the external-content notice next to the
+              description itself (AssetContent), only when it's relevant */}
           {title && !noPageHeader && (
             <PageHeader center={headerCenter} isHome={isHome} />
           )}

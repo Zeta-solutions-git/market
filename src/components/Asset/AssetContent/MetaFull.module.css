@@ -1,81 +1,50 @@
-.metaFull {
-  margin-top: var(--spacer);
-  display: grid;
-  gap: var(--spacer);
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-}
-.metaFull a {
-  display: inline-block;
-  max-width: 100%;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-all;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: normal;
-}
-
-.metaFull code {
-  /* magic number cause the code font has a bigger visual weight */
-  font-family: var(--font-family);
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 129%;
-  color: var(--clr-slate-70);
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-all;
-  padding: 0;
-}
-
-/* debug output */
-.metaFull + div {
-  margin-top: 10px;
-}
-.dataAuther {
-  font-family: var(--font-family);
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 129%;
-  color: var(--clr-slate-70);
-  text-transform: uppercase;
-}
-
-.licenseRow {
-  grid-column: 1 / -1;
+/* Asset details: label/value grid in the ODL palette (navy values, slate labels). */
+.section {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  max-width: 100%;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  pointer-events: auto;
-}
-.licenseRow a {
-  max-width: 100%;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: break-word;
-}
-.licenceTitle {
-  font-family: var(--font-family);
-  font-weight: 700;
-  font-size: 14px;
-  text-transform: uppercase;
-  color: #303031;
-}
-.didContainer {
-  margin-top: 1rem;
+  gap: 20px;
 }
 
-@media (min-width: 1024px) {
-  .metaFull {
-    grid-template-columns: 0.6fr 0.6fr 1.6fr;
-  }
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 18px 28px;
+  min-width: 0;
+}
 
-  /* Make the 4th item (if present) span full width */
-  .metaFull > *:nth-child(4):last-child {
-    grid-column: 1 / -1;
-  }
+.fields > * {
+  min-width: 0;
+}
+
+.fields a {
+  color: #316aea;
+  overflow-wrap: anywhere;
+}
+
+.fields code {
+  font-family: var(--font-family-monospace);
+  font-size: 0.85rem;
+  color: #092861;
+  background: #f5f7fa;
+  border-radius: 4px;
+  padding: 1px 6px;
+  overflow-wrap: anywhere;
+}
+
+.license {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* technical identifiers: two roomy columns, values may be long */
+.technical {
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+}
+
+.identifier {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
 }

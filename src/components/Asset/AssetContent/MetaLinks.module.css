@@ -1,7 +1,7 @@
 /* chips flow horizontally and wrap to the next line */
 /* vertical rhythm matching the other metadata sections */
 .section {
-  margin: var(--spacer) 0;
+  margin: 0;
 }
 
 .list {
@@ -20,9 +20,10 @@
   gap: calc(var(--spacer) / 3);
   max-width: 100%;
   padding: calc(var(--spacer) / 6) calc(var(--spacer) / 2);
-  border: 1px solid var(--clr-navy);
-  border-radius: 20px;
-  color: var(--clr-navy);
+  border: 1px solid #cfd6e2;
+  border-radius: 999px;
+  color: #092861;
+  background: #ffffff;
   font-weight: var(--font-weight-bold);
   text-decoration: none;
   line-height: 1.4;
@@ -32,13 +33,14 @@
 /* fill-on-hover, mirroring the project's outlined (`.ocean`) button */
 .chip:hover,
 .chip:focus {
-  background: var(--clr-navy);
-  color: var(--brand-white);
+  background: #eaf0fd;
+  border-color: #316aea;
+  color: #092861;
 }
 
 .chip:hover .icon path,
 .chip:focus .icon path {
-  stroke: var(--brand-white);
+  stroke: #092861;
 }
 
 .text {

@@ -1,45 +1,44 @@
+/* Wallet/network notice. ODL palette, wraps instead of a fixed 40px row. */
 .feedback {
-  /* font-size: var(--font-size-small); */
-  padding-left: 12px;
-  /* padding-top: calc(var(--spacer) / 1.5); */
-  margin-top: calc(var(--spacer) / 2);
-  margin-bottom: calc(var(--spacer) / 1);
   position: relative;
-  width: 100%;
-  background: var(--surface-warning);
   display: flex;
-  height: 40px;
-  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eaf0fd;
 }
 
 .feedback i {
-  position: absolute;
-  left: 0;
-  /* top: calc(var(--spacer) / 1.45); */
+  display: none;
 }
 
 .title {
-  font-family: var(--font-family);
-  margin-bottom: 0px;
-  margin-top: 14px;
-  font-weight: 400;
-  font-size: 14px;
-  color: #303031;
+  margin: 0;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #092861;
 }
 
 .error {
-  font-family: var(--font-family);
-  font-size: 14px;
-  margin-bottom: 0px;
-  margin-top: 11px;
-  font-weight: 700;
+  margin: 0;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
   text-decoration: underline;
-  text-decoration-skip-ink: none;
-  color: #4ca3d3;
+  color: #316aea;
   cursor: pointer;
 }
 
+.warningImage {
+  display: flex;
+}
+
 .warningImage svg {
-  width: 25px !important;
-  height: 43px !important;
+  width: 18px !important;
+  height: 18px !important;
 }

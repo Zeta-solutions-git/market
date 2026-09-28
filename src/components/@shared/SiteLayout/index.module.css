@@ -288,6 +288,24 @@
   filter: brightness(0) invert(1);
 }
 
+/* The 288px column gap only fits wide screens: tighten it, then wrap the
+   columns into a grid so none of them is pushed off-screen on phones. */
+@media (max-width: 1100px) {
+  .footerCols {
+    gap: 96px;
+  }
+}
+
+@media (max-width: 720px) {
+  .footerCols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 32px 24px;
+    justify-content: start;
+    padding-bottom: 32px;
+  }
+}
+
 /* Stack the two groups on narrow screens instead of squeezing them. */
 @media (max-width: 860px) {
   .footerBottom {

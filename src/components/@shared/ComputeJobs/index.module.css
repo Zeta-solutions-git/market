@@ -8,11 +8,11 @@
 }
 
 .title {
-  font-family: var(--font-family);
-  font-weight: 700;
-  font-size: 22px;
-  color: #303031;
-  margin-bottom: 20px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #092861;
+  margin-bottom: 12px;
 }
 
 .jobsTable {

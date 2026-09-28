@@ -351,13 +351,16 @@ export const useAuth = () => {
     sessionStorage.setItem(OIDC_LOGOUT_PENDING_KEY, 'true')
   }, [setLogoutPending])
 
-  const login = async (mode: PendingAuthMode = 'login') => {
+  // `returnTo` (a same-site path) brings the user back to where they started,
+  // e.g. the asset page they clicked "Log in to get access" on.
+  const login = async (mode: PendingAuthMode = 'login', returnTo?: string) => {
     setLoading(true)
     try {
       const callbackUrl =
-        typeof router.query.callbackUrl === 'string'
+        returnTo ||
+        (typeof router.query.callbackUrl === 'string'
           ? router.query.callbackUrl
-          : null
+          : null)
       clearOidcStorage()
       setPendingAuthMode(mode)
       if (callbackUrl) {
@@ -376,8 +379,8 @@ export const useAuth = () => {
     }
   }
 
-  const beginOidcFlow = async (mode: PendingAuthMode) => {
-    await login(mode)
+  const beginOidcFlow = async (mode: PendingAuthMode, returnTo?: string) => {
+    await login(mode, returnTo)
   }
 
   const logout = async () => {

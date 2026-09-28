@@ -197,3 +197,11 @@ textarea:focus-visible {
 select {
   appearance: none;
 }
+
+/* Asset page on phones: room for the fixed "Get access" bar
+   (class toggled by components/Asset/AssetContent). */
+@media (max-width: 59.99rem) {
+  body.asset-mobile-bar {
+    padding-bottom: 72px;
+  }
+}

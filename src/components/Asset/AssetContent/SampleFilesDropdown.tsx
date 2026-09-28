@@ -19,6 +19,7 @@ interface SampleFile {
 interface SampleFilesDropdownProps {
   assetLinks?: Record<string, string>
   services?: Service[]
+  defaultExpanded?: boolean
 }
 
 function extractFileNameFromUrl(url: string): string {
@@ -35,9 +36,10 @@ function extractFileNameFromUrl(url: string): string {
 
 export default function SampleFilesDropdown({
   assetLinks,
-  services = []
+  services = [],
+  defaultExpanded = false
 }: SampleFilesDropdownProps): ReactElement | null {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
   const sampleFiles = useMemo(() => {
     const files: SampleFile[] = []

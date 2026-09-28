@@ -1,0 +1,64 @@
+/* small building blocks for the asset page sections */
+.muted {
+  margin: 0;
+  color: #52607a;
+  font-size: 0.95rem;
+}
+
+.algoList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 8px;
+}
+
+.algoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #e3e8f0;
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.algoName {
+  color: #092861;
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.algoName:hover {
+  color: #316aea;
+}
+
+.algoMeta {
+  display: flex;
+  gap: 4px;
+  align-items: baseline;
+  font-size: 0.8rem;
+  color: #52607a;
+}
+
+.algoMeta > div {
+  display: inline;
+}
+
+.linkButton {
+  align-self: flex-start;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: #316aea;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: none;
+  cursor: pointer;
+}

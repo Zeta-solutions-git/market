@@ -6,8 +6,9 @@
 }
 
 .section > h3 {
-  font-size: var(--text-xxl);
-  color: var(--text-ink);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #092861;
   margin: 0;
 }
 

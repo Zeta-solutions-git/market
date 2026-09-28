@@ -5,15 +5,33 @@ import Tags from '@shared/atoms/AssetTags'
 import { Asset } from 'src/@types/Asset'
 import SampleFilesDropdown from './SampleFilesDropdown'
 
-export default function MetaSecondary({ ddo }: { ddo: Asset }): ReactElement {
+export function hasSampleFiles(ddo: Asset): boolean {
   // Sample data files live on the individual services (`service.links`)
-  const hasServiceLinks = ddo?.credentialSubject?.services?.some(
-    (service) => service.links && Object.keys(service.links).length > 0
+  return Boolean(
+    ddo?.credentialSubject?.services?.some(
+      (service) => service.links && Object.keys(service.links).length > 0
+    )
   )
+}
+
+// The asset page places the tags in the header and the samples in their own
+// section; `part` picks one of them, the default renders both.
+export default function MetaSecondary({
+  ddo,
+  part = 'all'
+}: {
+  ddo: Asset
+  part?: 'samples' | 'tags' | 'all'
+}): ReactElement {
+  const showSamples = part !== 'tags' && hasSampleFiles(ddo)
+  const showTags =
+    part !== 'samples' && ddo?.credentialSubject?.metadata?.tags?.length > 0
+
+  if (!showSamples && !showTags) return null
 
   return (
     <aside className={styles.metaSecondary}>
-      {hasServiceLinks && (
+      {showSamples && (
         <div className={styles.samples}>
           <MetaItem
             title="Sample Data"
@@ -25,9 +43,7 @@ export default function MetaSecondary({ ddo }: { ddo: Asset }): ReactElement {
           />
         </div>
       )}
-      {ddo?.credentialSubject?.metadata?.tags?.length > 0 && (
-        <Tags items={ddo?.credentialSubject?.metadata?.tags} />
-      )}
+      {showTags && <Tags items={ddo?.credentialSubject?.metadata?.tags} />}
     </aside>
   )
 }

@@ -5,14 +5,44 @@ import Publisher from '@shared/Publisher'
 import { useAsset } from '@context/Asset'
 import { Asset } from 'src/@types/Asset'
 import { IpfsRemoteSource } from '@components/@shared/IpfsRemoteSource'
-import Label from '@components/@shared/FormInput/Label'
+import NetworkName from '@shared/NetworkName'
 import { assetStateToString } from '@utils/assetState'
 import { safeExternalWebUrl } from '@utils/url'
 import AdditionalLicenseFiles from './AdditionalLicenseFiles'
 import MetaLinks from './MetaLinks'
 import TruncatedMetaValue from './TruncatedMetaValue'
+import Copy from '@shared/atoms/Copy'
 
-export default function MetaFull({ ddo }: { ddo: Asset }): ReactElement {
+// The asset page shows the human-facing details ("details") in the main
+// column and tucks the identifiers/infrastructure ("technical") into a
+// collapsed section. `part="all"` renders both, one after the other.
+// long identifiers: truncated in the middle (full value on hover) + copy button
+function Identifier({
+  value,
+  start,
+  end
+}: {
+  value: string
+  start: number
+  end: number
+}): ReactElement {
+  return (
+    <span className={styles.identifier}>
+      <TruncatedMetaValue value={value} start={start} end={end} />
+      <Copy text={value} />
+    </span>
+  )
+}
+
+export type MetaFullPart = 'details' | 'technical' | 'all'
+
+export default function MetaFull({
+  ddo,
+  part = 'all'
+}: {
+  ddo: Asset
+  part?: MetaFullPart
+}): ReactElement {
   const { isInPurgatory, assetState, asset } = useAsset()
   const credentialSubject = ddo?.credentialSubject
   const metadata = credentialSubject?.metadata
@@ -38,20 +68,13 @@ export default function MetaFull({ ddo }: { ddo: Asset }): ReactElement {
   const paymentCollector = asset?.accessDetails?.[0]?.paymentCollector
   const publisherDid = ddo?.issuer
 
-  return ddo ? (
-    <>
-      <div className={styles.didContainer}>
-        <MetaItem
-          title="DID"
-          content={<TruncatedMetaValue value={ddo.id} start={12} end={8} />}
-        />
-      </div>
+  if (!ddo) return null
 
-      <div className={styles.metaFull}>
+  const details = (
+    <div className={styles.section}>
+      <div className={styles.fields}>
         {!isInPurgatory && metadata?.author && (
-          <span className={styles.dataAuther}>
-            <MetaItem title="Data Author" content={metadata.author} />
-          </span>
+          <MetaItem title="Data Author" content={metadata.author} />
         )}
         {metadata?.copyrightHolder && (
           <MetaItem
@@ -77,17 +100,6 @@ export default function MetaFull({ ddo }: { ddo: Asset }): ReactElement {
           title="Owner"
           content={<Publisher account={ddo?.indexedMetadata?.nft?.owner} />}
         />
-        {publisherDid && (
-          <MetaItem
-            title="Publisher DID"
-            content={
-              <TruncatedMetaValue value={publisherDid} start={12} end={12} />
-            }
-          />
-        )}
-        {effectiveAssetState !== 'Active' && (
-          <MetaItem title="Asset State" content={effectiveAssetState} />
-        )}
         {paymentCollector &&
           paymentCollector !== ddo?.indexedMetadata?.nft?.owner && (
             <MetaItem
@@ -95,35 +107,95 @@ export default function MetaFull({ ddo }: { ddo: Asset }): ReactElement {
               content={<Publisher account={paymentCollector} />}
             />
           )}
-        {metadata?.type === 'algorithm' && dockerImage && (
-          <MetaItem title="Docker Image" content={dockerImage} />
+        {effectiveAssetState !== 'Active' && (
+          <MetaItem title="Asset State" content={effectiveAssetState} />
         )}
-      </div>
-
-      <MetaLinks links={ddo?.credentialSubject?.metadata?.links} />
-
-      <div className={styles.licenseRow}>
-        <Label htmlFor="license">
-          <span className={styles.licenceTitle}>License</span>
-        </Label>
-        {primaryLicenseMirror?.type === 'url' && primaryLicenseMirror?.url ? (
-          <a
-            target="_blank"
-            href={safeExternalWebUrl(primaryLicenseMirror.url)}
-            rel="noreferrer"
-          >
-            {primaryLicenseDocument.name}
-          </a>
-        ) : (
-          <IpfsRemoteSource
-            noDocumentLabel="No license document available"
-            remoteSource={primaryLicenseMirror}
-            name={primaryLicenseDocument?.name}
+        {metadata?.type === 'algorithm' && dockerImage && (
+          <MetaItem title="Docker Image" content={<code>{dockerImage}</code>} />
+        )}
+        {metadata?.type === 'algorithm' && algorithmContainer?.entrypoint && (
+          <MetaItem
+            title="Entrypoint"
+            content={<code>{algorithmContainer.entrypoint}</code>}
           />
         )}
-        <AdditionalLicenseFiles licenseDocuments={license?.licenseDocuments} />
-        <MetaItem title="OE Node" content={oeNode || 'Not available'} />
+        <MetaItem
+          title="License"
+          content={
+            <div className={styles.license}>
+              {primaryLicenseMirror?.type === 'url' &&
+              primaryLicenseMirror?.url ? (
+                <a
+                  target="_blank"
+                  href={safeExternalWebUrl(primaryLicenseMirror.url)}
+                  rel="noreferrer"
+                >
+                  {primaryLicenseDocument.name}
+                </a>
+              ) : (
+                <IpfsRemoteSource
+                  noDocumentLabel="No license document available"
+                  remoteSource={primaryLicenseMirror}
+                  name={primaryLicenseDocument?.name}
+                />
+              )}
+              <AdditionalLicenseFiles
+                licenseDocuments={license?.licenseDocuments}
+              />
+            </div>
+          }
+        />
       </div>
+      <MetaLinks links={metadata?.links} />
+    </div>
+  )
+
+  const technical = (
+    <div className={`${styles.fields} ${styles.technical}`}>
+      <MetaItem
+        title="DID"
+        content={<Identifier value={ddo.id} start={12} end={8} />}
+      />
+      {publisherDid && (
+        <MetaItem
+          title="Publisher DID"
+          content={<Identifier value={publisherDid} start={12} end={12} />}
+        />
+      )}
+      {credentialSubject?.chainId && (
+        <MetaItem
+          title="Network"
+          content={<NetworkName networkId={credentialSubject.chainId} />}
+        />
+      )}
+      <MetaItem title="OE Node" content={oeNode || 'Not available'} />
+      {datatokenAddress && (
+        <MetaItem
+          title="Datatoken"
+          content={<Identifier value={datatokenAddress} start={8} end={6} />}
+        />
+      )}
+      {credentialSubject?.nftAddress && (
+        <MetaItem
+          title="Data NFT"
+          content={
+            <Identifier
+              value={credentialSubject.nftAddress}
+              start={8}
+              end={6}
+            />
+          }
+        />
+      )}
+    </div>
+  )
+
+  if (part === 'details') return details
+  if (part === 'technical') return technical
+  return (
+    <>
+      {details}
+      {technical}
     </>
-  ) : null
+  )
 }

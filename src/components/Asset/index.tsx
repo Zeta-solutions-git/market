@@ -20,7 +20,7 @@ export default function AssetDetails({ uri }: { uri: string }): ReactElement {
   }, [asset, error, isInPurgatory, router, title, uri])
 
   return asset && pageTitle !== undefined && !loading ? (
-    <Page title={pageTitle} uri={uri}>
+    <Page title={pageTitle} uri={uri} noPageHeader>
       <AssetContent asset={asset} />
     </Page>
   ) : error ? (
@@ -28,7 +28,7 @@ export default function AssetDetails({ uri }: { uri: string }): ReactElement {
       <Alert title={pageTitle} text={error} state={'error'} />
     </Page>
   ) : (
-    <Page title=" " uri={uri}>
+    <Page title=" " uri={uri} noPageHeader>
       <AssetDetailsSkeleton />
     </Page>
   )

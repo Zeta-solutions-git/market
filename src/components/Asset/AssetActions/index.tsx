@@ -64,7 +64,8 @@ export default function AssetActions({
   serviceIndex,
   handleBack,
   consumableFeedback,
-  onComputeJobCreated
+  onComputeJobCreated,
+  hideBackButton
 }: {
   asset: AssetExtended
   service: Service
@@ -73,6 +74,8 @@ export default function AssetActions({
   handleBack: () => void
   consumableFeedback?: string
   onComputeJobCreated?: () => void
+  // the asset page keeps the service list visible, so "Back" is redundant there
+  hideBackButton?: boolean
 }): ReactElement {
   const router = useRouter()
   const { address: accountId } = useAccount()
@@ -157,6 +160,9 @@ export default function AssetActions({
   const [fileIsLoading, setFileIsLoading] = useState<boolean>(false)
   const [isAccountIdWhitelisted, setIsAccountIdWhitelisted] =
     useState<boolean>()
+  const [isOwned, setIsOwned] = useState<boolean>(
+    Boolean(accessDetails?.isOwned)
+  )
 
   const isCompute = service.type === 'compute'
   const rerunJobId = useMemo(() => {
@@ -308,6 +314,15 @@ export default function AssetActions({
       : `${accessDetails.price || 0} ${accessDetails.baseToken?.symbol || ''}`
   const salesCount = asset.indexedMetadata?.stats?.[0]?.orders || 0
 
+  // Download flow, as in the OE docs: check credentials -> review price and
+  // terms -> download. Purely informational; Download drives the real state.
+  const accessSteps = ['Check access', 'Confirm', 'Download']
+  const accessStep = isOwned
+    ? 2
+    : requiresCredentialCheck && !hasVerifiedCredentials
+    ? 0
+    : 1
+
   const handleComputeClick = () => {
     if (isConsumptionDisabled) return
     setIsComputePopupOpen(true)
@@ -453,41 +468,69 @@ export default function AssetActions({
   }
   return (
     <>
-      <div className={styles.headerRow}>
-        <Button
-          style="outlined"
-          size="small"
-          onClick={handleBack}
-          className={styles.backButton}
-        >
-          <BackSVG /> Back
-        </Button>
-        {accountId && (
-          <WhitelistIndicator
-            accountId={accountId}
-            isAccountIdWhitelisted={isAccountIdWhitelisted}
-            minimal
-          />
-        )}
-      </div>
+      {!hideBackButton && (
+        <div className={styles.headerRow}>
+          <Button
+            style="outlined"
+            size="small"
+            onClick={handleBack}
+            className={styles.backButton}
+          >
+            <BackSVG /> Back
+          </Button>
+        </div>
+      )}
+      {/* Only speak up about the allow-list when it blocks this account; the
+          "passed" state lives in the panel's Wallet & credentials details. */}
+      {accountId && isAccountIdWhitelisted === false && (
+        <WhitelistIndicator
+          accountId={accountId}
+          isAccountIdWhitelisted={isAccountIdWhitelisted}
+          minimal
+        />
+      )}
 
       <div className={styles.assetInteractionCard}>
+        {!isCompute && (
+          <ol className={styles.steps} aria-label="Steps to get access">
+            {accessSteps.map((label, i) => {
+              const state =
+                i < accessStep ? 'done' : i === accessStep ? 'current' : 'todo'
+              return (
+                <li
+                  key={label}
+                  className={`${styles.step} ${styles[state]}`}
+                  aria-current={state === 'current' ? 'step' : undefined}
+                >
+                  <span className={styles.stepDot}>{i + 1}</span>
+                  {label}
+                </li>
+              )
+            })}
+          </ol>
+        )}
+
         <div className={styles.cardTopRow}>
           <div className={styles.fileInfoSection}>
-            <FileSVG width={48} height={60} />
+            <FileSVG width={20} height={25} aria-hidden="true" />
             <div className={styles.fileDetails}>
-              <div className={styles.fileDetailItem}>
-                <span className={styles.fileDetailLabel}>Type:</span>{' '}
-                {fileMetadata?.type || 'Plain Text'}
-              </div>
-              <div className={styles.fileDetailItem}>
-                <span className={styles.fileDetailLabel}>Size:</span>{' '}
-                {fileMetadata?.contentLength || '5.31 kB'}
-              </div>
-              <div className={styles.fileDetailItem}>
-                <span className={styles.fileDetailLabel}>Access via:</span>{' '}
+              {fileMetadata?.type && (
+                <span className={styles.fileDetailItem}>
+                  <span className={styles.fileDetailLabel}>Type</span>{' '}
+                  {fileMetadata.type}
+                </span>
+              )}
+              {fileMetadata?.contentLength &&
+                fileMetadata.contentLength !== '0' && (
+                  <span className={styles.fileDetailItem}>
+                    <span className={styles.fileDetailLabel}>Size</span>{' '}
+                    {fileMetadata.contentLength}
+                  </span>
+                )}
+              <span className={styles.fileDetailItem}>
+                <span className={styles.fileDetailLabel}>Access via</span>{' '}
                 {accessDetails.type === 'free' ? 'URL' : accessDetails.type}
-              </div>
+              </span>
             </div>
           </div>
 
@@ -514,7 +557,7 @@ export default function AssetActions({
                 className={styles.computeButton}
                 disabled={isConsumptionDisabled || !isAccountIdWhitelisted}
               >
-                Start Compute
+                Start compute job
               </Button>
             ) : hasVerifiedCredentials ? (
               <Download
@@ -532,6 +575,7 @@ export default function AssetActions({
                 fileIsLoading={fileIsLoading}
                 consumableFeedback={consumableFeedback}
                 isPSConfigured={isPSConfigured === true}
+                onOwnedChange={setIsOwned}
               />
             ) : (
               <AssetActionCheckCredentials asset={asset} service={service} />
@@ -543,7 +587,7 @@ export default function AssetActions({
               className={styles.computeButton}
               disabled={isConsumptionDisabled || !isAccountIdWhitelisted}
             >
-              Start Compute
+              Start compute job
             </Button>
           ) : (
             <Download
@@ -561,6 +605,7 @@ export default function AssetActions({
               fileIsLoading={fileIsLoading}
               consumableFeedback={consumableFeedback}
               isPSConfigured={isPSConfigured === true}
+              onOwnedChange={setIsOwned}
             />
           )}
         </div>

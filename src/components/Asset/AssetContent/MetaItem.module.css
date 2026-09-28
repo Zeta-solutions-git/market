@@ -1,28 +1,32 @@
+/* One label/value pair. Label: small caps slate; value: ODL navy. */
 .metaItem {
-  font-size: var(--font-size-small);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .title {
-  font-family: var(--font-family);
-  font-weight: 700;
-  font-size: 14px;
+  margin: 0;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #303031;
-  margin-bottom: calc(var(--spacer) / 4);
+  color: #52607a;
 }
 
 .content {
-  font-family: var(--font-family);
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 129%;
-  color: var(--clr-slate-70);
-  word-wrap: break-word;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: #092861;
+  overflow-wrap: anywhere;
   white-space: normal;
 }
 
 .horizontal {
-  display: flex;
   flex-direction: row;
-  gap: var(--sp-2);
+  align-items: baseline;
+  gap: 8px;
 }

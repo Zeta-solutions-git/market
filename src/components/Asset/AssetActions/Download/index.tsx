@@ -74,7 +74,8 @@ export default function Download({
   dtBalance,
   isAccountIdWhitelisted,
   consumableFeedback,
-  isPSConfigured
+  isPSConfigured,
+  onOwnedChange
 }: {
   accountId: string
   signer: Signer
@@ -90,6 +91,8 @@ export default function Download({
   fileIsLoading?: boolean
   consumableFeedback?: string
   isPSConfigured: boolean
+  // lets the asset page's step indicator follow the purchase
+  onOwnedChange?: (owned: boolean) => void
 }): ReactElement {
   const isSsiConsumptionDisabled = isSsiPolicyConsumptionDisabled(
     asset,
@@ -137,6 +140,10 @@ export default function Download({
   const [isOwner, setIsOwner] = useState(false)
   const [validOrderTx, setValidOrderTx] = useState('')
   const [justBought, setJustBought] = useState(false)
+
+  useEffect(() => {
+    onOwnedChange?.(isOwned)
+  }, [isOwned, onOwnedChange])
 
   const [orderPriceAndFees, setOrderPriceAndFees] =
     useState<OrderPriceAndFees>()
