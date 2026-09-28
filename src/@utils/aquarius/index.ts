@@ -69,13 +69,15 @@ function getRangeFilterTerm(filterField: string, gteValue: string): FilterTerm {
 // `credentialSubject.services` is mapped as a NESTED object in the node's
 // op_ddo_v5 index, so a flat term/terms query on `services.serviceEndpoint`
 // (with or without a `.keyword` subfield) matches zero docs — which silently
-// empties the whole catalogue. It must be wrapped in a nested query. Endpoints
-// are compared without a trailing slash because the index stores them bare,
-// while PROVIDER_URL / NODE_URI_INDEXED usually carry one.
+// empties the whole catalogue. It must be wrapped in a nested query. The index
+// stores serviceEndpoint exactly as published (`serviceEndpoint` is a plain
+// keyword), and assets published with PROVIDER_URL carry a trailing slash, so
+// match each endpoint both with and without one.
 export function getServiceEndpointFilter(endpoints: TFilterValue): FilterTerm {
-  const list = (Array.isArray(endpoints) ? endpoints : [endpoints])
+  const bare = (Array.isArray(endpoints) ? endpoints : [endpoints])
     .filter((value): value is string => typeof value === 'string')
     .map((value) => value.replace(/\/+$/, ''))
+  const list = [...new Set(bare.flatMap((value) => [value, `${value}/`]))]
 
   return {
     nested: {

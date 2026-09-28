@@ -70,7 +70,13 @@ import {
   VpPolicyType
 } from '@components/@shared/PolicyEditor/types'
 import { SsiWalletContext } from '@context/SsiWallet'
-import { isSessionValid, signMessage } from '@utils/wallet/ssiWallet'
+import {
+  getWalletDids,
+  getWalletKeys,
+  getWallets,
+  isSessionValid,
+  signMessage
+} from '@utils/wallet/ssiWallet'
 import { isCredentialPolicyBased } from '@utils/credentials'
 import { State } from 'src/@types/ddo/State'
 import { transformComputeFormToServiceComputeOptions } from '@utils/compute'
@@ -948,6 +954,60 @@ async function createJwtVerifiableCredential(
   return `${headerBase64}.${payloadBase64}.${signatureBase64}`
 }
 
+export interface SsiSigningIdentity {
+  walletId: string
+  keyId: string
+  did: string
+}
+
+// Resolves the SSI wallet, DID and matching key used to sign the DDO. The
+// header widget that used to load these is not rendered by our SiteLayout, so
+// publishing must not rely on it: an empty DID becomes an empty `issuer`,
+// which the node rejects at DDO validation after the NFT is already minted.
+export async function resolveSsiSigningIdentity(
+  ssiWalletContext: SsiWalletContext
+): Promise<SsiSigningIdentity> {
+  const token = ssiWalletContext.sessionToken?.token
+  if (!token || !(await isSessionValid(token))) {
+    ssiWalletContext.setSessionToken(undefined)
+    throw new Error('Invalid SSI Wallet session')
+  }
+
+  let wallet = ssiWalletContext.selectedWallet
+  if (!wallet) {
+    wallet = (await getWallets(token))[0]
+    if (!wallet) throw new Error('No SSI wallet found for this account.')
+    ssiWalletContext.setSelectedWallet(wallet)
+  }
+
+  const dids = await getWalletDids(wallet.id, token)
+  const selectedKeyId = ssiWalletContext.selectedKey?.keyId?.id
+  const did =
+    dids.find((item) => item.did === ssiWalletContext.selectedDid) ||
+    dids.find((item) => item.keyId === selectedKeyId) ||
+    dids[0]
+  if (!did?.did) {
+    throw new Error(
+      'Your SSI wallet has no DID. Add a DID to your SSI wallet before publishing.'
+    )
+  }
+
+  let key = ssiWalletContext.selectedKey
+  if (!key || key.keyId?.id !== did.keyId) {
+    const keys = await getWalletKeys(wallet, token)
+    key = keys.find((item) => item.keyId?.id === did.keyId)
+    if (!key) {
+      throw new Error(`No key found in your SSI wallet for DID ${did.did}.`)
+    }
+    ssiWalletContext.setSelectedKey(key)
+  }
+  if (ssiWalletContext.selectedDid !== did.did) {
+    ssiWalletContext.setSelectedDid(did.did)
+  }
+
+  return { walletId: wallet.id, keyId: key.keyId.id, did: did.did }
+}
+
 export async function signAssetAndUploadToIpfs(
   asset: Asset,
   owner: Signer,
@@ -974,23 +1034,16 @@ export async function signAssetAndUploadToIpfs(
 
   let jwtVerifiableCredential
   if (appConfig.ssiEnabled) {
-    let valid = false
-
-    if (ssiWalletContext.sessionToken) {
-      valid = await isSessionValid(ssiWalletContext.sessionToken.token)
-    }
-    if (valid) {
-      credential.issuer = ssiWalletContext?.selectedDid
-      jwtVerifiableCredential = await signMessage(
-        ssiWalletContext?.selectedWallet?.id,
-        ssiWalletContext?.selectedKey.keyId?.id,
-        credential as VCDataModel.Credential,
-        ssiWalletContext.sessionToken.token
-      )
-    } else {
-      ssiWalletContext.setSessionToken(undefined)
-      throw new Error('Invalid SSI Wallet session')
-    }
+    const { walletId, keyId, did } = await resolveSsiSigningIdentity(
+      ssiWalletContext
+    )
+    credential.issuer = did
+    jwtVerifiableCredential = await signMessage(
+      walletId,
+      keyId,
+      credential as VCDataModel.Credential,
+      ssiWalletContext.sessionToken.token
+    )
   } else {
     credential.issuer = `${await owner.getAddress()}`
     jwtVerifiableCredential = await createJwtVerifiableCredential(

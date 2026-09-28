@@ -4,6 +4,7 @@ import { initialPublishFeedback, initialValues } from './_constants'
 import { useAccountPurgatory } from '@hooks/useAccountPurgatory'
 import {
   createTokensAndPricing,
+  resolveSsiSigningIdentity,
   signAssetAndUploadToIpfs,
   IpfsUpload,
   transformPublishFormToDdo
@@ -74,6 +75,10 @@ export default function PublishPage({
 
     try {
       if (!chainId) throw new Error('No chain ID detected.')
+      // Check the SSI DID before minting, so a missing DID fails here instead
+      // of producing an on-chain asset the node cannot index.
+      if (appConfig.ssiEnabled)
+        await resolveSsiSigningIdentity(ssiWalletContext)
       const config = getOceanConfig(chainId)
       LoggerInstance.log('[publish] using config: ', config)
 
