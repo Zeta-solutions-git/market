@@ -1,0 +1,82 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px 28px;
+}
+
+.blockie {
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.identity {
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.name {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: #092861;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e8f5ec;
+  color: #1e7a3c;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badgeIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 0;
+  margin: 6px 0 0;
+  color: #52607a;
+  font-size: 0.95rem;
+}
+
+/* dot separators between meta items */
+.meta > span + span::before {
+  content: '·';
+  margin: 0 10px;
+  color: #b3bccb;
+}
+
+.address {
+  font-size: 0.9rem;
+  color: #52607a;
+  margin-right: 6px;
+}
+
+@media (max-width: 600px) {
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px 16px;
+  }
+}

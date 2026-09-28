@@ -1,0 +1,136 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px 0 64px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+/* ---- sidebar ---- */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 24px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px 10px;
+}
+
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navGroupTitle {
+  padding: 0 10px 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a94a6;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #092861;
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.navItem:hover {
+  background: #f5f7fa;
+}
+
+.navItem:focus-visible {
+  outline: 2px solid var(--secondary, #316aea);
+  outline-offset: 1px;
+}
+
+.navItemActive {
+  background: #eaf0fd;
+  color: var(--secondary, #316aea);
+  font-weight: 600;
+}
+
+.navIcon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* ---- content ---- */
+.content {
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px 28px 28px;
+}
+
+.contentHeader {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.contentTitle {
+  margin: 0;
+  font-size: 1.35rem;
+  color: #092861;
+}
+
+.contentDescription {
+  margin: 4px 0 0;
+  color: #52607a;
+  font-size: 0.95rem;
+}
+
+/* ---- mobile: sidebar becomes a horizontal scroll row ---- */
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .navGroup {
+    flex-direction: row;
+  }
+
+  .navGroupTitle {
+    display: none;
+  }
+
+  .navItem {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .content {
+    padding: 20px 16px;
+  }
+}

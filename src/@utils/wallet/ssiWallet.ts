@@ -361,6 +361,32 @@ export async function usePresentationRequest(
   }
 }
 
+// All credentials stored in the user's SSI wallet (walt.id wallet API).
+export async function getWalletCredentials(
+  walletId: string,
+  token: string
+): Promise<SsiVerifiableCredential[]> {
+  const api = getSsiWalletApi()
+  if (!api) {
+    throw new Error('No SSI Wallet API configured')
+  }
+  try {
+    const response = await axios.get(
+      `${api}/wallet-api/wallet/${walletId}/credentials`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        withCredentials: true
+      }
+    )
+
+    return response.data
+  } catch (error) {
+    throw error.response
+  }
+}
+
 export function getSsiVerifiableCredentialType(
   credential: SsiVerifiableCredential
 ): string {

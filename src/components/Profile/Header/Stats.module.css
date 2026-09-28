@@ -60,3 +60,28 @@
 .withdrawHint {
   display: inline;
 }
+
+.escrowAvailable {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.withdrawButton {
+  border: 1px solid var(--secondary, #316aea);
+  background: var(--secondary, #316aea);
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.withdrawButton:disabled {
+  background: transparent;
+  color: #9aa5b8;
+  border-color: #d5dbe5;
+  cursor: not-allowed;
+}

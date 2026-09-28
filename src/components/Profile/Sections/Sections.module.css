@@ -1,0 +1,269 @@
+/* Shared building blocks for the profile sections */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #092861;
+}
+
+.cardText {
+  margin: 0;
+  color: #52607a;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.muted {
+  color: #8a94a6;
+}
+
+/* label / value rows */
+.fields {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) 1fr;
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.fields dt {
+  color: #52607a;
+  font-size: 0.92rem;
+}
+
+.fields dd {
+  margin: 0;
+  color: #092861;
+  font-size: 0.95rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* action rows (security, notifications, …) */
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #eef0f4;
+}
+
+.row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.rowTitle {
+  display: block;
+  color: #092861;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.rowText {
+  display: block;
+  color: #52607a;
+  font-size: 0.88rem;
+  margin-top: 2px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #092861;
+  background: #092861;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.button:hover {
+  background: #ffffff;
+  color: #092861;
+}
+
+.buttonSecondary {
+  composes: button;
+  background: #ffffff;
+  color: #092861;
+  border-color: #cfd6e2;
+}
+
+.buttonSecondary:hover {
+  border-color: #092861;
+}
+
+.buttonDanger {
+  composes: button;
+  background: #ffffff;
+  color: #b42318;
+  border-color: #f1c4bf;
+}
+
+.buttonDanger:hover {
+  color: #b42318;
+  border-color: #b42318;
+}
+
+.button:disabled,
+.buttonSecondary:disabled,
+.buttonDanger:disabled {
+  background: #f5f7fa;
+  color: #9aa5b8;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+}
+
+.soon {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #fff4e0;
+  color: #9a5b00;
+  font-size: 0.72rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+/* quick-action tiles on the overview */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #092861;
+  text-decoration: none;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tile:hover {
+  border-color: var(--secondary, #316aea);
+  box-shadow: 0 4px 14px rgba(9, 40, 97, 0.1);
+}
+
+.tileIcon {
+  font-size: 26px;
+  color: var(--secondary, #316aea);
+}
+
+.tileTitle {
+  font-weight: 600;
+}
+
+.tileText {
+  color: #52607a;
+  font-size: 0.88rem;
+}
+
+/* status dot */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  color: #092861;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #9aa5b8;
+}
+
+.dotOn {
+  background: #22a355;
+}
+
+/* credential list */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.listItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #eef0f4;
+  border-radius: 6px;
+}
+
+.listIcon {
+  font-size: 22px;
+  color: var(--secondary, #316aea);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .fields {
+    grid-template-columns: 1fr;
+    gap: 2px 0;
+  }
+
+  .fields dd {
+    margin-bottom: 10px;
+  }
+
+  .row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

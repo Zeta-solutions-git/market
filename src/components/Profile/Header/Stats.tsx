@@ -38,18 +38,21 @@ function EscrowAvailableLabel({
       <span className={styles.escrowAvailableLabel}>
         Escrow Available Funds
       </span>
-      {hasAvailable && (
-        <span className={styles.withdrawHint}>👉 Click to Withdraw 👈</span>
-      )}
     </>
   )
 }
 
+// variant: 'activity' = sales/published/downloads/revenue (profile overview),
+// 'funds' = balance + escrow (wallet section), 'all' = everything.
 export default function Stats({
-  selectedToken
+  selectedToken,
+  variant = 'all'
 }: {
   selectedToken?: string
+  variant?: 'all' | 'activity' | 'funds'
 }): ReactElement {
+  const showActivity = variant !== 'funds'
+  const showFunds = variant !== 'activity'
   const {
     activeAssetsTotal,
     activeSales,
@@ -94,13 +97,17 @@ export default function Stats({
 
   return (
     <div className={styles.stats}>
-      <NumberUnit
-        label={`Sale${activeSales === 1 ? '' : 's'}`}
-        value={activeSales < 0 ? 0 : activeSales}
-      />
-      <NumberUnit label="Published" value={activeAssetsTotal} />
-      <NumberUnit label="Downloads" value={activeDownloadsTotal} />
-      {activeToken && (
+      {showActivity && (
+        <>
+          <NumberUnit
+            label={`Sale${activeSales === 1 ? '' : 's'}`}
+            value={activeSales < 0 ? 0 : activeSales}
+          />
+          <NumberUnit label="Published" value={activeAssetsTotal} />
+          <NumberUnit label="Downloads" value={activeDownloadsTotal} />
+        </>
+      )}
+      {showActivity && activeToken && (
         <NumberUnit
           label="Revenue"
           value={
@@ -112,7 +119,7 @@ export default function Stats({
           tooltip={selectedNetworkName || undefined}
         />
       )}
-      {ownAccount && activeToken && (
+      {showFunds && ownAccount && activeToken && (
         <>
           <NumberUnit
             label="Balance"
@@ -142,10 +149,7 @@ export default function Stats({
                 : undefined
             }
           />
-          <div
-            onClick={hasAvailable ? () => setShowModal(true) : undefined}
-            style={{ cursor: hasAvailable ? 'pointer' : 'default' }}
-          >
+          <div className={styles.escrowAvailable}>
             <NumberUnit
               label={<EscrowAvailableLabel hasAvailable={hasAvailable} />}
               value={
@@ -160,6 +164,14 @@ export default function Stats({
                   : undefined
               }
             />
+            <button
+              type="button"
+              className={styles.withdrawButton}
+              onClick={() => setShowModal(true)}
+              disabled={!hasAvailable}
+            >
+              Withdraw
+            </button>
           </div>
         </>
       )}
