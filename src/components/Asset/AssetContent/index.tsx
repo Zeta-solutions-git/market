@@ -8,7 +8,7 @@ import {
 } from 'react'
 import Markdown from '@shared/Markdown'
 import MetaFull from './MetaFull'
-import MetaSecondary, { hasSampleFiles } from './MetaSecondary'
+import { hasSampleFiles } from './MetaSecondary'
 import { useUserPreferences } from '@context/UserPreferences'
 import Bookmark from './Bookmark'
 import { useAsset } from '@context/Asset'
@@ -47,49 +47,39 @@ function getDescription(asset: AssetExtended): string {
   return description['@value'] || ''
 }
 
-interface Section {
-  id: string
-  label: string
-}
+type AssetTab = 'overview' | 'technical'
 
-// In-page navigation that stays in view and highlights the section on screen.
-function SectionNav({ sections }: { sections: Section[] }): ReactElement {
-  const [active, setActive] = useState(sections[0]?.id)
+const TABS: { id: AssetTab; label: string }[] = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'technical', label: 'Technical' }
+]
 
-  useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') return
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
-        if (visible[0]) setActive(visible[0].target.id)
-      },
-      { rootMargin: '-80px 0px -60% 0px' }
-    )
-    sections.forEach(({ id }) => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-    return () => observer.disconnect()
-  }, [sections])
-
-  if (sections.length < 2) return null
-
+// Two tabs: the human-facing overview (description, samples, details,
+// compute) and the technical identifiers. Stays in view while scrolling.
+function AssetTabs({
+  active,
+  onChange
+}: {
+  active: AssetTab
+  onChange: (tab: AssetTab) => void
+}): ReactElement {
   return (
-    <nav className={styles.sectionNav} aria-label="On this page">
-      {sections.map(({ id, label }) => (
-        <a
+    <div className={styles.sectionNav} role="tablist" aria-label="Asset">
+      {TABS.map(({ id, label }) => (
+        <button
           key={id}
-          href={`#${id}`}
+          type="button"
+          role="tab"
+          id={`tab-${id}`}
+          aria-selected={active === id}
+          aria-controls={`panel-${id}`}
           className={active === id ? styles.navActive : undefined}
-          aria-current={active === id ? 'true' : undefined}
-          onClick={() => setActive(id)}
+          onClick={() => onChange(id)}
         >
           {label}
-        </a>
+        </button>
       ))}
-    </nav>
+    </div>
   )
 }
 
@@ -109,6 +99,7 @@ export default function AssetContent({
   const [isClamped, setIsClamped] = useState(false)
   const [showDdo, setShowDdo] = useState(false)
   const [panelInView, setPanelInView] = useState(true)
+  const [tab, setTab] = useState<AssetTab>('overview')
   const descriptionRef = useRef<HTMLDivElement>(null)
 
   const metadata = asset.credentialSubject?.metadata
@@ -215,7 +206,7 @@ export default function AssetContent({
     const observer = new ResizeObserver(measure)
     observer.observe(el)
     return () => observer.disconnect()
-  }, [description, expanded, allowExternalContent])
+  }, [description, expanded, allowExternalContent, tab])
 
   // phones: once the access panel scrolls away, offer a bar to jump back to it
   useEffect(() => {
@@ -234,21 +225,6 @@ export default function AssetContent({
     document.body.classList.toggle('asset-mobile-bar', showMobileBar)
     return () => document.body.classList.remove('asset-mobile-bar')
   }, [showMobileBar])
-
-  const sections: Section[] = useMemo(
-    () =>
-      [
-        { id: 'overview', label: 'Overview' },
-        showSamples && { id: 'samples', label: 'Sample data' },
-        { id: 'details', label: 'Details' },
-        computeServices.length > 0 && {
-          id: 'compute',
-          label: 'Compute-to-Data'
-        },
-        { id: 'technical', label: 'Technical' }
-      ].filter(Boolean) as Section[],
-    [showSamples, computeServices.length]
-  )
 
   const isBlockscoutExplorer = blockscoutNetworks.includes(
     asset?.credentialSubject?.chainId
@@ -302,109 +278,120 @@ export default function AssetContent({
         </aside>
 
         <div className={styles.main}>
-          <SectionNav sections={sections} />
+          <AssetTabs active={tab} onChange={setTab} />
 
-          {!isInPurgatory && (
-            <section id="overview" className={styles.section}>
-              <h2 className={styles.sectionTitle}>Overview</h2>
-              {hasExternalContent && !allowExternalContent && (
-                <ExternalContentWarning />
-              )}
-              {description ? (
-                <>
-                  <div
-                    ref={descriptionRef}
-                    className={`${styles.description} ${
-                      expanded ? styles.expanded : styles.collapsed
-                    } ${!expanded && isClamped ? styles.clamped : ''}`}
-                  >
-                    <Markdown
-                      text={description}
-                      blockImages={!allowExternalContent}
-                    />
-                  </div>
-                  {(isClamped || expanded) && (
-                    <button
-                      type="button"
-                      className={styles.toggle}
-                      aria-expanded={expanded}
-                      onClick={() => setExpanded(!expanded)}
-                    >
-                      {expanded ? 'Show less' : 'Show full description'}
-                    </button>
+          {tab === 'overview' && (
+            <div
+              role="tabpanel"
+              id="panel-overview"
+              aria-labelledby="tab-overview"
+            >
+              {!isInPurgatory && (
+                <section id="overview" className={styles.section}>
+                  <h2 className={styles.sectionTitle}>Overview</h2>
+                  {hasExternalContent && !allowExternalContent && (
+                    <ExternalContentWarning />
                   )}
-                </>
-              ) : (
-                <p className={styles.muted}>No description provided.</p>
+                  {description ? (
+                    <>
+                      <div
+                        ref={descriptionRef}
+                        className={`${styles.description} ${
+                          expanded ? styles.expanded : styles.collapsed
+                        } ${!expanded && isClamped ? styles.clamped : ''}`}
+                      >
+                        <Markdown
+                          text={description}
+                          blockImages={!allowExternalContent}
+                        />
+                      </div>
+                      {(isClamped || expanded) && (
+                        <button
+                          type="button"
+                          className={styles.toggle}
+                          aria-expanded={expanded}
+                          onClick={() => setExpanded(!expanded)}
+                        >
+                          {expanded ? 'Show less' : 'Show full description'}
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <p className={styles.muted}>No description provided.</p>
+                  )}
+                </section>
               )}
-            </section>
-          )}
 
-          {showSamples && (
-            <section id="samples" className={styles.section}>
-              <h2 className={styles.sectionTitle}>Sample data</h2>
-              <p className={styles.muted}>
-                Free example files so you can check the format before you get
-                access.
-              </p>
-              <SampleFilesDropdown services={services} defaultExpanded />
-            </section>
-          )}
-
-          <section id="details" className={styles.section}>
-            <h2 className={styles.sectionTitle}>Details</h2>
-            <MetaFull ddo={asset} part="details" />
-          </section>
-
-          {computeServices.length > 0 && (
-            <section id="compute" className={styles.section}>
-              <h2 className={styles.sectionTitle}>Compute-to-Data</h2>
-              {isAlgorithm ? (
-                <p className={styles.muted}>
-                  This algorithm runs on datasets whose publishers approved it.
-                  You pick the dataset when you start a compute job; the data
-                  never leaves its provider.
-                </p>
-              ) : (
-                <>
+              {showSamples && (
+                <section id="samples" className={styles.section}>
+                  <h2 className={styles.sectionTitle}>Sample data</h2>
                   <p className={styles.muted}>
-                    This dataset can be used in compute jobs: approved
-                    algorithms run next to the data, and you only receive the
-                    results.
+                    Free example files so you can check the format before you
+                    get access.
                   </p>
-                  {computeServices.map(({ service }) => (
-                    <div key={service.id} className={styles.subsection}>
-                      <h3 className={styles.subTitle}>
-                        Algorithms you can run
-                        {computeServices.length > 1 && ` (${service.name})`}
-                      </h3>
-                      <AllowedAlgorithms asset={asset} service={service} />
-                    </div>
-                  ))}
-                </>
+                  <SampleFilesDropdown services={services} defaultExpanded />
+                </section>
               )}
-              {isPublished &&
-                accountId &&
-                computeServiceIndex !== undefined &&
-                computeServiceIndex >= 0 && (
-                  <div className={styles.jobs}>
-                    <ComputeJobs
-                      asset={asset}
-                      refetchTrigger={computeJobsRefetchTrigger}
-                    />
-                  </div>
-                )}
-            </section>
+
+              <section id="details" className={styles.section}>
+                <h2 className={styles.sectionTitle}>Details</h2>
+                <MetaFull ddo={asset} part="details" />
+              </section>
+
+              {computeServices.length > 0 && (
+                <section id="compute" className={styles.section}>
+                  <h2 className={styles.sectionTitle}>Compute-to-Data</h2>
+                  {isAlgorithm ? (
+                    <p className={styles.muted}>
+                      This algorithm runs on datasets whose publishers approved
+                      it. You pick the dataset when you start a compute job; the
+                      data never leaves its provider.
+                    </p>
+                  ) : (
+                    <>
+                      <p className={styles.muted}>
+                        This dataset can be used in compute jobs: approved
+                        algorithms run next to the data, and you only receive
+                        the results.
+                      </p>
+                      {computeServices.map(({ service }) => (
+                        <div key={service.id} className={styles.subsection}>
+                          <h3 className={styles.subTitle}>
+                            Algorithms you can run
+                            {computeServices.length > 1 && ` (${service.name})`}
+                          </h3>
+                          <AllowedAlgorithms asset={asset} service={service} />
+                        </div>
+                      ))}
+                    </>
+                  )}
+                  {isPublished &&
+                    accountId &&
+                    computeServiceIndex !== undefined &&
+                    computeServiceIndex >= 0 && (
+                      <div className={styles.jobs}>
+                        <ComputeJobs
+                          asset={asset}
+                          refetchTrigger={computeJobsRefetchTrigger}
+                        />
+                      </div>
+                    )}
+                </section>
+              )}
+            </div>
           )}
 
-          <section id="technical" className={styles.section}>
-            <details className={styles.technical}>
-              <summary>
-                <h2 className={styles.sectionTitle}>Technical details</h2>
-                <span className={styles.muted}>
-                  Identifiers, network and on-chain data
-                </span>
-              </summary>
+          {tab === 'technical' && (
+            <section
+              id="panel-technical"
+              role="tabpanel"
+              aria-labelledby="tab-technical"
+              className={styles.section}
+            >
+              <h2 className={styles.sectionTitle}>Technical details</h2>
+              <p className={styles.muted}>
+                Identifiers, network and on-chain data
+              </p>
               <div className={styles.technicalBody}>
                 <div className={styles.nftRow}>
                   <Nft isBlockscoutExplorer={isBlockscoutExplorer} />
@@ -437,8 +424,8 @@ export default function AssetContent({
                   </button>
                 )}
               </div>
-            </details>
-          </section>
+            </section>
+          )}
         </div>
       </article>
 

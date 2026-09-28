@@ -162,8 +162,15 @@
   display: none;
 }
 
-.sectionNav a {
+.sectionNav button {
   flex: none;
+  margin: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font: inherit;
+  text-transform: none;
+  cursor: pointer;
   padding: 6px 12px;
   border-radius: 6px;
   color: #52607a;
@@ -173,18 +180,18 @@
   white-space: nowrap;
 }
 
-.sectionNav a:hover {
+.sectionNav button:hover {
   color: #092861;
   background: #f5f7fa;
 }
 
-.sectionNav a.navActive {
+.sectionNav button.navActive {
   color: #092861;
   background: #eaf0fd;
   font-weight: 600;
 }
 
-.sectionNav a:focus-visible {
+.sectionNav button:focus-visible {
   outline: 2px solid #316aea;
   outline-offset: 2px;
 }
@@ -300,50 +307,12 @@
   margin-top: 8px;
 }
 
-/* ---------- technical (collapsed) ---------- */
-.technical summary {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  cursor: pointer;
-  list-style: none;
-  position: relative;
-  padding-right: 28px;
-}
-
-.technical summary::-webkit-details-marker {
-  display: none;
-}
-
-.technical summary::after {
-  content: '';
-  position: absolute;
-  right: 6px;
-  top: 8px;
-  width: 8px;
-  height: 8px;
-  border-right: 2px solid #52607a;
-  border-bottom: 2px solid #52607a;
-  transform: rotate(45deg);
-  transition: transform 0.15s ease;
-}
-
-.technical[open] summary::after {
-  transform: rotate(-135deg);
-  top: 12px;
-}
-
-.technical summary:focus-visible {
-  outline: 2px solid #316aea;
-  outline-offset: 4px;
-  border-radius: 4px;
-}
-
+/* ---------- technical tab ---------- */
 .technicalBody {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding-top: 20px;
+  padding-top: 6px;
 }
 
 .nftRow {
