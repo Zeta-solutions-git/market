@@ -6,11 +6,25 @@ import AuthEntry from '../../Header/AuthEntry'
 import Networks from '../../Header/UserPreferences/Networks'
 import { useAuth } from '@hooks/useAuth'
 import { useMarketMetadata } from '@context/MarketMetadata'
-import Upload from '@images/publish.svg'
 import AccountMenu from './AccountMenu'
 import styles from './index.module.css'
 
-const CATALOGUE_HREF = '/search?sort=indexedMetadata.event.block&sortOrder=desc'
+export const CATALOGUE_HREF =
+  '/search?sort=indexedMetadata.event.block&sortOrder=desc'
+
+// Marketing/content pages get the nav links; every other route is a
+// marketplace page (catalogue, asset, publish, profile, …) with app controls.
+const MARKETING_ROUTES = [
+  '/',
+  '/about-us',
+  '/projects',
+  '/the-team',
+  '/contact',
+  '/[slug]',
+  '/privacy/[slug]',
+  '/404',
+  '/signup/submitted'
+]
 
 // Shared marketing chrome (navbar + footer) used by the homepage and the
 // standalone content pages (About us, Projects, The Team, Contact). Keep the
@@ -20,6 +34,7 @@ const CATALOGUE_HREF = '/search?sort=indexedMetadata.event.block&sortOrder=desc'
 // Primary navbar links. `href` drives Next routing; add a page under
 // src/pages/ with the matching slug when you add an entry here.
 export const NAV_LINKS = [
+  { label: 'Catalogue', href: CATALOGUE_HREF },
   { label: 'About us', href: '/about-us' },
   { label: 'Projects', href: '/projects' },
   { label: 'The Team', href: '/the-team' },
@@ -56,19 +71,28 @@ const FOOTER_COLS = [
 // Bright-blue boxed "Catalogue" CTA. When logged in it links straight to the
 // catalogue; when logged out it kicks off the Authentik login flow (the
 // catalogue is gated, and the default post-login destination is the catalogue).
-function CatalogueButton(): ReactElement {
+export function CatalogueButton({
+  className,
+  label = 'Catalogue'
+}: {
+  className?: string
+  label?: string
+}): ReactElement {
   const { isAuthenticated, authEnabled, beginOidcFlow } = useAuth()
   const loggedIn = !authEnabled || isAuthenticated
 
   const inner = (
     <span className={styles.buttonContent}>
-      <span className={styles.buttonText}>Catalogue</span>
+      <span className={styles.buttonText}>{label}</span>
     </span>
   )
 
   if (loggedIn) {
     return (
-      <Link href={CATALOGUE_HREF} className={styles.catalogueButton}>
+      <Link
+        href={CATALOGUE_HREF}
+        className={className || styles.catalogueButton}
+      >
         {inner}
       </Link>
     )
@@ -77,7 +101,7 @@ function CatalogueButton(): ReactElement {
   return (
     <button
       type="button"
-      className={styles.catalogueButton}
+      className={className || styles.catalogueButton}
       onClick={() => beginOidcFlow('login').catch(() => undefined)}
     >
       {inner}
@@ -100,27 +124,26 @@ function SignupLink(): ReactElement {
   )
 }
 
-// The functional marketplace controls that replace the marketing nav links on
-// the catalogue page (chain switcher, account menu, publish).
-function CatalogueControls(): ReactElement {
+// Marketplace pages: no marketing links. [Networks] [Catalogue] then the
+// account: Login + Sign up, or the profile dropdown, which is always last.
+function AppControls({ onCatalogue }: { onCatalogue: boolean }): ReactElement {
   const { validatedSupportedChains } = useMarketMetadata()
   const { isAuthenticated, authEnabled, beginOidcFlow } = useAuth()
-  const showAuthedControls = !authEnabled || isAuthenticated
-  const showAuthButtons = authEnabled && !isAuthenticated
+  const showAccount = !authEnabled || isAuthenticated
 
   return (
     <div className={styles.catalogueControls}>
       {validatedSupportedChains.length > 1 && <Networks />}
-      {showAuthedControls && <AccountMenu />}
-      <Link href="/publish/1" className={styles.catalogueButton}>
-        <span className={styles.buttonContent}>
-          <Upload className={styles.publishIcon} />
-          <span className={styles.buttonText}>Publish</span>
-        </span>
-      </Link>
-      {/* Public catalogue: a logged-out visitor still gets Login / Sign up
-          here, since the wallet/SSI controls above are hidden for them. */}
-      {showAuthButtons && (
+      {!onCatalogue && (
+        <Link href={CATALOGUE_HREF} className={styles.catalogueButton}>
+          <span className={styles.buttonContent}>
+            <span className={styles.buttonText}>Catalogue</span>
+          </span>
+        </Link>
+      )}
+      {showAccount ? (
+        <AccountMenu />
+      ) : (
         <>
           <button
             type="button"
@@ -141,9 +164,7 @@ function CatalogueControls(): ReactElement {
 function Nav(): ReactElement {
   const { beginOidcFlow, isAuthenticated, authEnabled } = useAuth()
   const router = useRouter()
-  // On the catalogue page we swap the marketing links for the functional
-  // marketplace controls.
-  const isCatalogue = router.pathname === '/search'
+  const isMarketing = MARKETING_ROUTES.includes(router.pathname)
   const showAuthButtons = authEnabled && !isAuthenticated
 
   return (
@@ -156,9 +177,9 @@ function Nav(): ReactElement {
         >
           <Logo />
         </Link>
-        {/* centered links (absolutely centered in the bar) — hidden on the
-            catalogue, where functional controls take their place */}
-        {!isCatalogue && (
+        {/* centered links (absolutely centered in the bar) — marketing pages
+            only; marketplace pages get the app controls instead */}
+        {isMarketing && (
           <nav className={styles.navLinks} aria-label="Primary">
             {NAV_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className={styles.navLink}>
@@ -168,14 +189,13 @@ function Nav(): ReactElement {
           </nav>
         )}
         <div className={styles.navActions}>
-          {isCatalogue ? (
-            <CatalogueControls />
+          {!isMarketing ? (
+            <AppControls onCatalogue={router.pathname === '/search'} />
           ) : (
             <>
-              {/* Order: [Catalogue] [Login] [Sign up]. Login goes straight to
-                  the Authentik login flow (via /api/auth/login); Sign up goes
-                  to the Authentik enrollment flow. */}
-              <CatalogueButton />
+              {/* Order: [Login] [Sign up] or the profile dropdown. Catalogue
+                  is one of the nav links here. Login goes straight to the
+                  Authentik login flow; Sign up to the enrollment flow. */}
               <AuthEntry
                 authenticatedContent={<AccountMenu />}
                 loginClassName={styles.pillButton}

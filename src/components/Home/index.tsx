@@ -1,6 +1,7 @@
 import { ReactElement } from 'react'
 import Marquee from 'react-fast-marquee'
 import styles from './index.module.css'
+import { CatalogueButton } from '@shared/SiteLayout'
 
 // OpenDataSpace landing page. Navbar + footer come from the shared SiteLayout;
 // this file owns the homepage-only sections: Hero · Logo strip · Info.
@@ -94,9 +95,23 @@ function Hero(): ReactElement {
               Products available in the catalogue
             </span>
           </div>
-          <button type="button" className={styles.discoverButton}>
-            Discover more
-          </button>
+          <div className={styles.heroActions}>
+            <button
+              type="button"
+              className={styles.discoverButton}
+              onClick={() =>
+                document
+                  .getElementById('marketplace')
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            >
+              Discover more
+            </button>
+            <CatalogueButton
+              className={styles.catalogueButton}
+              label="Browse the catalogue"
+            />
+          </div>
         </div>
 
         {/* RIGHT COLUMN — image collage */}
@@ -140,7 +155,7 @@ function LogoStrip(): ReactElement {
 
 function InfoSection(): ReactElement {
   return (
-    <section className={styles.info} aria-label="Info section">
+    <section id="marketplace" className={styles.info} aria-label="Info section">
       <div className={styles.sectionInner}>
         <div className={styles.infoLayout}>
           {/* LEFT COLUMN — text */}

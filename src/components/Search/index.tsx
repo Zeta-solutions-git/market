@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef
 } from 'react'
+import Link from 'next/link'
 import AssetList from '@shared/AssetList'
 import AssetViewSelector from '@shared/AssetList/AssetViewSelector'
 import queryString from 'query-string'
@@ -374,10 +375,20 @@ export default function SearchPage({
     <div className={styles.page}>
       <div className={styles.inner}>
         <header className={styles.header}>
-          <h1 className={styles.title}>Catalogue</h1>
-          <p className={styles.subtitle}>
-            Datasets and algorithms shared on Open Dataspace Lab.
-          </p>
+          <div className={styles.titleRow}>
+            <div>
+              <h1 className={styles.title}>Catalogue</h1>
+              <p className={styles.subtitle}>
+                Datasets and algorithms shared on Open Dataspace Lab.
+              </p>
+            </div>
+            <Link href="/publish/1" className={styles.publishButton}>
+              <span className="material-symbols-rounded" aria-hidden="true">
+                upload
+              </span>
+              Publish an asset
+            </Link>
+          </div>
           <form
             className={styles.search}
             role="search"

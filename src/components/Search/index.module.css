@@ -21,6 +21,44 @@
   margin-bottom: 32px;
 }
 
+.titleRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.publishButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 12px 22px;
+  border: 1px solid #316aea;
+  border-radius: 8px;
+  background: #316aea;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.publishButton span {
+  font-size: 20px;
+}
+
+.publishButton:hover {
+  background: #ffffff;
+  color: #316aea;
+}
+
+.publishButton:focus-visible {
+  outline: 2px solid #092861;
+  outline-offset: 2px;
+}
+
 .title {
   margin: 0;
   font-family: var(--font-family-heading);

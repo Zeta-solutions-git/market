@@ -80,8 +80,41 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 32px;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+/* bright-blue companion to Discover more (same size) */
+.catalogueButton {
+  display: inline-flex;
+  align-items: center;
+  background: #316aea;
+  color: #ffffff;
+  border: 1px solid #316aea;
+  border-radius: 8px;
+  padding: 16px 34px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.catalogueButton:hover {
+  background: #ffffff;
+  color: #316aea;
+}
+
+/* the navbar is not sticky, but leave a little air above the section */
+.info {
+  scroll-margin-top: 16px;
 }
 
 .discoverButton:hover {
