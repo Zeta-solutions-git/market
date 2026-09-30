@@ -1,4 +1,11 @@
-import { ReactElement, useState, useEffect, useCallback, useMemo } from 'react'
+import {
+  ReactElement,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef
+} from 'react'
 import AssetList from '@shared/AssetList'
 import AssetViewSelector from '@shared/AssetList/AssetViewSelector'
 import queryString from 'query-string'
@@ -158,6 +165,8 @@ export default function SearchPage({
   const [loading, setLoading] = useState<boolean>(true)
   const [text, setText] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const resultsRef = useRef<HTMLElement>(null)
+  const [firstRowHeight, setFirstRowHeight] = useState<number>()
   const newCancelToken = useCancelToken()
 
   useEffect(() => {
@@ -319,6 +328,20 @@ export default function SearchPage({
   const tooMany =
     (queryResult?.totalPages || 0) > MAXIMUM_NUMBER_OF_PAGES_WITH_RESULTS
 
+  // the filter card is at least as tall as the first row of cards (grid view)
+  useEffect(() => {
+    const container = resultsRef.current
+    if (!container || typeof ResizeObserver === 'undefined') return
+    const measure = () => {
+      const card = container.querySelector('article')
+      setFirstRowHeight(card ? card.getBoundingClientRect().height : undefined)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [queryResult, loading, assetView])
+
   const emptyState = (
     <div className={styles.empty}>
       <span
@@ -424,6 +447,11 @@ export default function SearchPage({
               drawerOpen ? styles.drawerOpen : ''
             }`}
             aria-label="Filters"
+            style={
+              firstRowHeight && !drawerOpen
+                ? { minHeight: `${Math.round(firstRowHeight)}px` }
+                : undefined
+            }
           >
             <div className={styles.drawerHead}>
               <h2 className={styles.drawerTitle}>Filters</h2>
@@ -551,7 +579,11 @@ export default function SearchPage({
             )}
           </div>
 
-          <section className={styles.results} aria-label="Results">
+          <section
+            ref={resultsRef}
+            className={styles.results}
+            aria-label="Results"
+          >
             <AssetList
               assets={queryResult?.results}
               showPagination
