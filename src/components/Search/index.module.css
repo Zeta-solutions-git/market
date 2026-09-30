@@ -154,14 +154,37 @@
 .body {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 32px;
+  gap: 16px 32px;
 }
 
 @media (min-width: 60rem) {
   .body {
     grid-template-columns: 15rem minmax(0, 1fr);
+    grid-template-areas:
+      '. bar'
+      'sidebar results';
+    row-gap: 16px;
     align-items: start;
   }
+
+  .resultsBar {
+    grid-area: bar;
+  }
+
+  .sidebar {
+    grid-area: sidebar;
+  }
+
+  .results {
+    grid-area: results;
+  }
+}
+
+.resultsBar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
 }
 
 .sidebar {

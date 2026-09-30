@@ -57,7 +57,7 @@ const TYPE_TABS = [
 const FILTER_GROUPS = [
   {
     id: 'accessType',
-    label: 'How you can use it',
+    label: 'Access type',
     options: [
       { label: 'Download', value: FilterByAccessOptions.Download },
       { label: 'Compute-to-Data', value: FilterByAccessOptions.Compute }
@@ -473,7 +473,9 @@ export default function SearchPage({
             />
           )}
 
-          <section className={styles.results} aria-label="Results">
+          {/* own grid row above the cards, so the filter card and the first
+              row of cards start at the same height */}
+          <div className={styles.resultsBar}>
             <div className={styles.toolbar}>
               <p className={styles.count} aria-live="polite">
                 {loading
@@ -547,7 +549,9 @@ export default function SearchPage({
                 </button>
               </div>
             )}
+          </div>
 
+          <section className={styles.results} aria-label="Results">
             <AssetList
               assets={queryResult?.results}
               showPagination
