@@ -1,15 +1,21 @@
+/* card grid: fills columns of at least ~18rem, never stretches one card wide */
 .assetList {
   display: grid;
   grid-template-columns: 1fr;
-  gap: calc(var(--spacer) / 2);
-  overflow-x: clip;
+  gap: 20px;
 }
 
-@media screen and (min-width: 25rem) {
+@media screen and (min-width: 40rem) {
   .assetList {
-    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-    gap: var(--spacer);
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: 24px;
   }
+}
+
+.listPrice {
+  color: #092861;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .empty {
@@ -22,20 +28,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-@media screen and (min-width: 1200px) and (max-width: 1499px) {
-  .assetList {
-    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
-    gap: var(--spacer);
-  }
-}
-
-@media screen and (min-width: 1500px) {
-  .assetList {
-    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
-    gap: calc(var(--spacer) / 0.65);
-  }
 }
 
 .listViewWrapper {

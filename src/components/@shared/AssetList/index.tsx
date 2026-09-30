@@ -1,9 +1,8 @@
 import AssetTeaser from '@shared/AssetTeaser'
-import { ReactElement } from 'react'
+import { ReactElement, ReactNode } from 'react'
 import Link from 'next/link'
 import Pagination from '@shared/Pagination'
 import Publisher from '@shared/Publisher'
-import NetworkName from '@shared/NetworkName'
 import AssetType from '@shared/AssetType'
 import removeMarkdown from 'remove-markdown'
 import styles from './index.module.css'
@@ -14,6 +13,7 @@ import { AssetExtended } from 'src/@types/AssetExtended'
 import Alert from '../atoms/Alert'
 import AssetListSkeleton, { AssetListTableSkeleton } from './Skeleton'
 import { ServiceTypeIcons, ServicesColumnHeader } from './ServiceTypeIcons'
+import { getAssetPriceLabel } from '@utils/assetPriceLabel'
 
 const columns: TableOceanColumn<AssetExtended>[] = [
   {
@@ -64,12 +64,9 @@ const columns: TableOceanColumn<AssetExtended>[] = [
     width: '120px'
   },
   {
-    name: 'Network',
+    name: 'Price',
     cell: (row) => (
-      <NetworkName
-        networkId={row.credentialSubject?.chainId}
-        className={styles.listNetworkCell}
-      />
+      <span className={styles.listPrice}>{getAssetPriceLabel(row) || '—'}</span>
     ),
     maxWidth: '9rem'
   },
@@ -101,6 +98,8 @@ declare type AssetListProps = {
   noPrice?: boolean
   defaultAssetView?: AssetViewOptions
   skeletonCount?: number
+  // shown instead of the default "No results found" notice
+  emptyState?: ReactNode
 }
 
 export default function AssetList({
@@ -115,7 +114,8 @@ export default function AssetList({
   noDescription,
   noPrice,
   defaultAssetView,
-  skeletonCount = 21
+  skeletonCount = 21,
+  emptyState
 }: AssetListProps): ReactElement {
   const activeAssetView = defaultAssetView || AssetViewOptions.Grid
 
@@ -139,7 +139,11 @@ export default function AssetList({
   }
 
   if (!assets?.length || assets[0] === undefined) {
-    return <Alert warning>No results found</Alert>
+    return emptyState ? (
+      <>{emptyState}</>
+    ) : (
+      <Alert warning>No results found</Alert>
+    )
   }
 
   return (

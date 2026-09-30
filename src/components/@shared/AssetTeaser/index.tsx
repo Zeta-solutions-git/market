@@ -2,12 +2,10 @@ import { ReactElement } from 'react'
 import Link from 'next/link'
 import removeMarkdown from 'remove-markdown'
 import Publisher from '@shared/Publisher'
-import AssetType from '@shared/AssetType'
-import NetworkName from '@shared/NetworkName'
 import styles from './index.module.css'
 import { AssetExtended } from 'src/@types/AssetExtended'
 import Bookmark from '@components/Asset/AssetContent/Bookmark'
-import { ServiceTypeIcons } from '@shared/AssetList/ServiceTypeIcons'
+import { getAssetPriceLabel, getAssetUsageLabels } from '@utils/assetPriceLabel'
 
 declare type AssetTeaserProps = {
   asset: AssetExtended
@@ -16,85 +14,86 @@ declare type AssetTeaserProps = {
   noPrice?: boolean
 }
 
+const MAX_TAGS = 3
+
+function descriptionText(asset: AssetExtended): string {
+  const description = asset.credentialSubject?.metadata?.description as
+    | { '@value'?: string }
+    | string
+    | undefined
+  const raw =
+    typeof description === 'string' ? description : description?.['@value']
+  return removeMarkdown((raw || '').substring(0, 400))
+}
+
+// Catalogue card, in the style of the homepage feature cards: type icon +
+// label, title, publisher, short description, tags, and how it can be used.
 export default function AssetTeaser({
   asset,
   noPublisher,
-  noDescription
+  noDescription,
+  noPrice
 }: AssetTeaserProps): ReactElement {
-  const { name, type, description } = asset.credentialSubject.metadata
-  const services = asset.credentialSubject?.services
-  const hasServiceTypes = services?.some((service) =>
-    ['access', 'compute'].includes(service.type)
-  )
-  const owner = asset.indexedMetadata.nft?.owner
-  const { orders } = asset.indexedMetadata.stats[0] || {}
+  const { name, type, tags } = asset.credentialSubject.metadata
+  const isAlgorithm = type === 'algorithm'
+  const owner = asset.indexedMetadata?.nft?.owner
+  const orders = asset.indexedMetadata?.stats?.[0]?.orders
+  const description = noDescription ? '' : descriptionText(asset)
+  const usage = getAssetUsageLabels(asset)
+  const price = noPrice ? undefined : getAssetPriceLabel(asset)
+  const shownTags = (tags || []).filter(Boolean).slice(0, MAX_TAGS)
 
   return (
-    <article className={`${styles.teaser} ${styles[type]}`}>
+    <article className={styles.teaser}>
       <Link href={`/asset/${asset.id}`} className={styles.link}>
-        <aside className={styles.detailLine}>
-          <AssetType
-            className={styles.assetTypeLabel}
-            type={type}
-            variant="metadata"
-          />
-          {hasServiceTypes && (
-            <>
-              <span className={styles.detailDivider} aria-hidden="true" />
-              <ServiceTypeIcons
-                services={services}
-                hideEmpty
-                className={styles.serviceTypes}
-              />
-            </>
-          )}
-        </aside>
-        <header className={styles.header}>
-          <h1 className={styles.title}>{name.slice(0, 200)}</h1>
+        <div className={styles.typeRow}>
+          <span
+            className={`material-symbols-rounded ${styles.typeIcon}`}
+            aria-hidden="true"
+          >
+            {isAlgorithm ? 'code_blocks' : 'database'}
+          </span>
+          <span className={styles.typeLabel}>
+            {isAlgorithm ? 'Algorithm' : 'Dataset'}
+          </span>
+        </div>
 
-          {!noPublisher && (
-            <span className={styles.owner}>
-              <Publisher account={owner} minimal />
-            </span>
-          )}
-        </header>
-        {!noDescription && (
-          <div className={styles.content}>
-            <p className={styles.description}>
-              {removeMarkdown(description?.['@value']?.substring(0, 300) || '')}
-            </p>
-          </div>
+        <h3 className={styles.title}>{name?.slice(0, 200)}</h3>
+
+        {!noPublisher && owner && (
+          <span className={styles.owner}>
+            by <Publisher account={owner} minimal />
+          </span>
         )}
+
+        {description && <p className={styles.description}>{description}</p>}
+
+        {shownTags.length > 0 && (
+          <ul className={styles.tags} aria-label="Tags">
+            {shownTags.map((tag) => (
+              <li key={tag} className={styles.tag}>
+                {tag}
+              </li>
+            ))}
+          </ul>
+        )}
+
         <footer className={styles.footer}>
-          <div className={styles.stats}>
-            {orders && orders > 0 ? (
-              <span className={styles.typeLabel}>
-                {orders < 0 ? (
-                  'N/A'
-                ) : (
-                  <>
-                    <strong>{orders}</strong> {orders === 1 ? 'sale' : 'sales'}
-                  </>
-                )}
+          <span className={styles.usage}>
+            {usage.map((label) => (
+              <span key={label} className={styles.chip}>
+                {label}
               </span>
-            ) : null}
-            {asset.views && asset.views > 0 ? (
-              <span className={styles.typeLabel}>
-                {asset.views < 0 ? (
-                  'N/A'
-                ) : (
-                  <>
-                    <strong>{asset.views}</strong>{' '}
-                    {asset.views === 1 ? 'view' : 'views'}
-                  </>
-                )}
+            ))}
+          </span>
+          <span className={styles.meta}>
+            {orders > 0 && (
+              <span className={styles.sales}>
+                {orders} {orders === 1 ? 'sale' : 'sales'}
               </span>
-            ) : null}
-          </div>
-          <NetworkName
-            networkId={asset.credentialSubject?.chainId}
-            className={styles.networkName}
-          />
+            )}
+            {price && <span className={styles.price}>{price}</span>}
+          </span>
         </footer>
       </Link>
       <Bookmark did={asset.id} className={styles.bookmark} />

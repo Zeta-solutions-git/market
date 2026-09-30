@@ -1,8 +1,7 @@
 .viewSelectorContainer {
   display: flex;
   justify-content: flex-end;
-  gap: calc(var(--spacer) / 2);
-  margin-bottom: calc(var(--spacer) / 2);
+  gap: 6px;
 }
 
 .viewSelector,
@@ -25,12 +24,12 @@
 }
 
 .viewSelector svg path {
-  fill: var(--teaser-border-color);
+  fill: #8a94a6;
   transition: 0.2s ease-in-out;
 }
 
 .viewSelector:hover svg path,
 .selected svg path {
-  fill: var(--teaser-title-font-color);
+  fill: #316aea;
   transition: 0.2s ease-in-out;
 }
