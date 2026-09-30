@@ -373,202 +373,52 @@ export default function SearchPage({
 
   return (
     <div className={styles.page}>
-      <div className={styles.inner}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>Catalogue</h1>
-          <p className={styles.subtitle}>
-            Datasets and algorithms shared on Open Dataspace Lab.
-          </p>
-          <div className={styles.searchRow}>
-            <form
-              className={styles.search}
-              role="search"
-              onSubmit={(e) => {
-                e.preventDefault()
-                applyText.flush()
-              }}
-            >
-              <span
-                className={`material-symbols-rounded ${styles.searchIcon}`}
-                aria-hidden="true"
-              >
-                search
-              </span>
-              <input
-                id="catalogue-search"
-                type="search"
-                className={styles.searchInput}
-                placeholder="Search datasets, algorithms, tags or publishers"
-                aria-label="Search the catalogue"
-                value={text}
-                onChange={(e) => {
-                  setText(e.target.value)
-                  applyText(e.target.value)
+      {/* two bands: white header (title, search, tabs), grey results */}
+      <div className={styles.headBand}>
+        <div className={styles.inner}>
+          <header className={styles.header}>
+            <h1 className={styles.title}>Catalogue</h1>
+            <p className={styles.subtitle}>
+              Datasets and algorithms shared on Open Dataspace Lab.
+            </p>
+            <div className={styles.searchRow}>
+              <form
+                className={styles.search}
+                role="search"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  applyText.flush()
                 }}
-              />
-              {text && (
-                <button
-                  type="button"
-                  className={styles.clearSearch}
-                  aria-label="Clear search"
-                  onClick={() => {
-                    setText('')
-                    applyText('')
-                    applyText.flush()
-                  }}
+              >
+                <span
+                  className={`material-symbols-rounded ${styles.searchIcon}`}
+                  aria-hidden="true"
                 >
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    close
-                  </span>
-                </button>
-              )}
-            </form>
-            <Link href="/publish/1" className={styles.publishButton}>
-              <span className="material-symbols-rounded" aria-hidden="true">
-                upload
-              </span>
-              Publish an asset
-            </Link>
-          </div>
-          <div className={styles.tabs} role="tablist" aria-label="Asset type">
-            {TYPE_TABS.map((tab) => (
-              <button
-                key={tab.label}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab.value}
-                className={
-                  activeTab === tab.value ? styles.tabActive : undefined
-                }
-                onClick={() =>
-                  navigate({ serviceType: tab.value || undefined })
-                }
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </header>
-
-        <div className={styles.body}>
-          <aside
-            className={`${styles.sidebar} ${
-              drawerOpen ? styles.drawerOpen : ''
-            }`}
-            aria-label="Filters"
-            style={
-              firstRowHeight && !drawerOpen
-                ? { minHeight: `${Math.round(firstRowHeight)}px` }
-                : undefined
-            }
-          >
-            <div className={styles.drawerHead}>
-              <h2 className={styles.drawerTitle}>Filters</h2>
-              <button
-                type="button"
-                className={styles.iconButton}
-                aria-label="Close filters"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  close
+                  search
                 </span>
-              </button>
-            </div>
-            <FilterPanel
-              params={params}
-              chainOptions={chainOptions}
-              onToggle={toggleFilter}
-              onClear={() =>
-                navigate({
-                  accessType: undefined,
-                  priceType: undefined,
-                  supportedBlockchain: undefined
-                })
-              }
-              activeCount={
-                asList(params.accessType).length +
-                asList(params.priceType).length +
-                asList(params.supportedBlockchain).length
-              }
-            />
-            <button
-              type="button"
-              className={`${styles.primaryButton} ${styles.drawerDone}`}
-              onClick={() => setDrawerOpen(false)}
-            >
-              {loading
-                ? 'Show results'
-                : `Show ${total ?? 0} result${total === 1 ? '' : 's'}`}
-            </button>
-          </aside>
-          {drawerOpen && (
-            <div
-              className={styles.backdrop}
-              aria-hidden="true"
-              onClick={() => setDrawerOpen(false)}
-            />
-          )}
-
-          {/* own grid row above the cards, so the filter card and the first
-              row of cards start at the same height */}
-          <div className={styles.resultsBar}>
-            <div className={styles.toolbar}>
-              <p className={styles.count} aria-live="polite">
-                {loading
-                  ? 'Searching…'
-                  : tooMany
-                  ? 'More than 10,000 results, refine your search'
-                  : `${total ?? 0} result${total === 1 ? '' : 's'}`}
-              </p>
-              <div className={styles.toolbarRight}>
-                <button
-                  type="button"
-                  className={styles.filtersButton}
-                  onClick={() => setDrawerOpen(true)}
-                >
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    tune
-                  </span>
-                  Filters{filterCount > 0 ? ` (${filterCount})` : ''}
-                </button>
-                <label className={styles.sortLabel} htmlFor="catalogue-sort">
-                  Sort
-                </label>
-                <select
-                  id="catalogue-sort"
-                  className={styles.sortSelect}
-                  value={currentSort}
+                <input
+                  id="catalogue-search"
+                  type="search"
+                  className={styles.searchInput}
+                  placeholder="Search datasets, algorithms, tags or publishers"
+                  aria-label="Search the catalogue"
+                  value={text}
                   onChange={(e) => {
-                    const [sort, sortOrder] = e.target.value.split('|')
-                    navigate({ sort, sortOrder })
+                    setText(e.target.value)
+                    applyText(e.target.value)
                   }}
-                >
-                  {sortOptions.map((o) => (
-                    <option key={o.label} value={sortKey(o.sort, o.order)}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-                <AssetViewSelector
-                  activeView={assetView}
-                  onViewChange={setAssetView}
-                  className={styles.viewToggle}
                 />
-              </div>
-            </div>
-
-            {filterCount > 0 && (
-              <div className={styles.chips}>
-                {chips.map((chip) => (
+                {text && (
                   <button
-                    key={chip.key}
                     type="button"
-                    className={styles.chip}
-                    onClick={chip.remove}
-                    aria-label={`Remove filter ${chip.label}`}
+                    className={styles.clearSearch}
+                    aria-label="Clear search"
+                    onClick={() => {
+                      setText('')
+                      applyText('')
+                      applyText.flush()
+                    }}
                   >
-                    {chip.label}
                     <span
                       className="material-symbols-rounded"
                       aria-hidden="true"
@@ -576,35 +426,198 @@ export default function SearchPage({
                       close
                     </span>
                   </button>
-                ))}
+                )}
+              </form>
+              <Link href="/publish/1" className={styles.publishButton}>
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  upload
+                </span>
+                Publish an asset
+              </Link>
+            </div>
+            <div className={styles.tabs} role="tablist" aria-label="Asset type">
+              {TYPE_TABS.map((tab) => (
+                <button
+                  key={tab.label}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.value}
+                  className={
+                    activeTab === tab.value ? styles.tabActive : undefined
+                  }
+                  onClick={() =>
+                    navigate({ serviceType: tab.value || undefined })
+                  }
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </header>
+        </div>
+      </div>
+
+      <div className={styles.bodyBand}>
+        <div className={styles.inner}>
+          <div className={styles.body}>
+            <aside
+              className={`${styles.sidebar} ${
+                drawerOpen ? styles.drawerOpen : ''
+              }`}
+              aria-label="Filters"
+              style={
+                firstRowHeight && !drawerOpen
+                  ? { minHeight: `${Math.round(firstRowHeight)}px` }
+                  : undefined
+              }
+            >
+              <div className={styles.drawerHead}>
+                <h2 className={styles.drawerTitle}>Filters</h2>
                 <button
                   type="button"
-                  className={styles.linkButton}
-                  onClick={clearAll}
+                  className={styles.iconButton}
+                  aria-label="Close filters"
+                  onClick={() => setDrawerOpen(false)}
                 >
-                  Clear all
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    close
+                  </span>
                 </button>
               </div>
+              <FilterPanel
+                params={params}
+                chainOptions={chainOptions}
+                onToggle={toggleFilter}
+                onClear={() =>
+                  navigate({
+                    accessType: undefined,
+                    priceType: undefined,
+                    supportedBlockchain: undefined
+                  })
+                }
+                activeCount={
+                  asList(params.accessType).length +
+                  asList(params.priceType).length +
+                  asList(params.supportedBlockchain).length
+                }
+              />
+              <button
+                type="button"
+                className={`${styles.primaryButton} ${styles.drawerDone}`}
+                onClick={() => setDrawerOpen(false)}
+              >
+                {loading
+                  ? 'Show results'
+                  : `Show ${total ?? 0} result${total === 1 ? '' : 's'}`}
+              </button>
+            </aside>
+            {drawerOpen && (
+              <div
+                className={styles.backdrop}
+                aria-hidden="true"
+                onClick={() => setDrawerOpen(false)}
+              />
             )}
-          </div>
 
-          <section
-            ref={resultsRef}
-            className={styles.results}
-            aria-label="Results"
-          >
-            <AssetList
-              assets={queryResult?.results}
-              showPagination
-              isLoading={loading}
-              page={queryResult?.page}
-              totalPages={queryResult?.totalPages}
-              onPageChange={updatePage}
-              defaultAssetView={assetView}
-              skeletonCount={6}
-              emptyState={emptyState}
-            />
-          </section>
+            {/* own grid row above the cards, so the filter card and the first
+              row of cards start at the same height */}
+            <div className={styles.resultsBar}>
+              <div className={styles.toolbar}>
+                <p className={styles.count} aria-live="polite">
+                  {loading
+                    ? 'Searching…'
+                    : tooMany
+                    ? 'More than 10,000 results, refine your search'
+                    : `${total ?? 0} result${total === 1 ? '' : 's'}`}
+                </p>
+                <div className={styles.toolbarRight}>
+                  <button
+                    type="button"
+                    className={styles.filtersButton}
+                    onClick={() => setDrawerOpen(true)}
+                  >
+                    <span
+                      className="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      tune
+                    </span>
+                    Filters{filterCount > 0 ? ` (${filterCount})` : ''}
+                  </button>
+                  <label className={styles.sortLabel} htmlFor="catalogue-sort">
+                    Sort
+                  </label>
+                  <select
+                    id="catalogue-sort"
+                    className={styles.sortSelect}
+                    value={currentSort}
+                    onChange={(e) => {
+                      const [sort, sortOrder] = e.target.value.split('|')
+                      navigate({ sort, sortOrder })
+                    }}
+                  >
+                    {sortOptions.map((o) => (
+                      <option key={o.label} value={sortKey(o.sort, o.order)}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  <AssetViewSelector
+                    activeView={assetView}
+                    onViewChange={setAssetView}
+                    className={styles.viewToggle}
+                  />
+                </div>
+              </div>
+
+              {filterCount > 0 && (
+                <div className={styles.chips}>
+                  {chips.map((chip) => (
+                    <button
+                      key={chip.key}
+                      type="button"
+                      className={styles.chip}
+                      onClick={chip.remove}
+                      aria-label={`Remove filter ${chip.label}`}
+                    >
+                      {chip.label}
+                      <span
+                        className="material-symbols-rounded"
+                        aria-hidden="true"
+                      >
+                        close
+                      </span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className={styles.linkButton}
+                    onClick={clearAll}
+                  >
+                    Clear all
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <section
+              ref={resultsRef}
+              className={styles.results}
+              aria-label="Results"
+            >
+              <AssetList
+                assets={queryResult?.results}
+                showPagination
+                isLoading={loading}
+                page={queryResult?.page}
+                totalPages={queryResult?.totalPages}
+                onPageChange={updatePage}
+                defaultAssetView={assetView}
+                skeletonCount={6}
+                emptyState={emptyState}
+              />
+            </section>
+          </div>
         </div>
       </div>
     </div>
