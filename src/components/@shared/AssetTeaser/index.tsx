@@ -12,6 +12,8 @@ declare type AssetTeaserProps = {
   noPublisher?: boolean
   noDescription?: boolean
   noPrice?: boolean
+  // "row": slim full-width card for the catalogue's list view
+  variant?: 'card' | 'row'
 }
 
 const MAX_TAGS = 3
@@ -32,7 +34,8 @@ export default function AssetTeaser({
   asset,
   noPublisher,
   noDescription,
-  noPrice
+  noPrice,
+  variant = 'card'
 }: AssetTeaserProps): ReactElement {
   const { name, type, tags } = asset.credentialSubject.metadata
   const isAlgorithm = type === 'algorithm'
@@ -44,7 +47,9 @@ export default function AssetTeaser({
   const shownTags = (tags || []).filter(Boolean).slice(0, MAX_TAGS)
 
   return (
-    <article className={styles.teaser}>
+    <article
+      className={`${styles.teaser} ${variant === 'row' ? styles.row : ''}`}
+    >
       <Link href={`/asset/${asset.id}`} className={styles.link}>
         <div className={styles.typeRow}>
           <span

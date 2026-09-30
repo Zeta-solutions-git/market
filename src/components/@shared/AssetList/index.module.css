@@ -12,10 +12,10 @@
   }
 }
 
-.listPrice {
-  color: #092861;
-  font-weight: 600;
-  white-space: nowrap;
+.rowList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .empty {

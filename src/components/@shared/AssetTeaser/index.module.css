@@ -163,3 +163,72 @@
   top: 16px !important;
   right: 14px !important;
 }
+
+/* ---------- list view: slim full-width row card ---------- */
+@media (min-width: 40rem) {
+  .row .link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'type footer'
+      'title footer'
+      'owner footer'
+      'desc footer'
+      'tags footer';
+    column-gap: 32px;
+    row-gap: 4px;
+    padding: 18px 24px;
+  }
+
+  .row .typeRow {
+    grid-area: type;
+  }
+
+  .row .title {
+    grid-area: title;
+    margin: 0;
+    -webkit-line-clamp: 1;
+  }
+
+  .row .owner {
+    grid-area: owner;
+  }
+
+  .row .description {
+    grid-area: desc;
+    margin: 2px 0 0;
+    -webkit-line-clamp: 1;
+  }
+
+  .row .tags {
+    grid-area: tags;
+    margin-top: 6px;
+  }
+
+  /* right column: access type + price, centred, clear of the bookmark */
+  .row .footer {
+    grid-area: footer;
+    grid-row: 1 / -1;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+    padding: 0 40px 0 24px;
+    border-top: 0;
+    border-left: 1px solid #eef0f4;
+    min-width: 11rem;
+  }
+
+  .row .usage {
+    justify-content: flex-end;
+  }
+
+  .row .meta {
+    margin-left: 0;
+  }
+
+  .row .price {
+    font-size: 1.05rem;
+  }
+}
