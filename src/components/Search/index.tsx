@@ -375,13 +375,54 @@ export default function SearchPage({
     <div className={styles.page}>
       <div className={styles.inner}>
         <header className={styles.header}>
-          <div className={styles.titleRow}>
-            <div>
-              <h1 className={styles.title}>Catalogue</h1>
-              <p className={styles.subtitle}>
-                Datasets and algorithms shared on Open Dataspace Lab.
-              </p>
-            </div>
+          <h1 className={styles.title}>Catalogue</h1>
+          <p className={styles.subtitle}>
+            Datasets and algorithms shared on Open Dataspace Lab.
+          </p>
+          <div className={styles.searchRow}>
+            <form
+              className={styles.search}
+              role="search"
+              onSubmit={(e) => {
+                e.preventDefault()
+                applyText.flush()
+              }}
+            >
+              <span
+                className={`material-symbols-rounded ${styles.searchIcon}`}
+                aria-hidden="true"
+              >
+                search
+              </span>
+              <input
+                id="catalogue-search"
+                type="search"
+                className={styles.searchInput}
+                placeholder="Search datasets, algorithms, tags or publishers"
+                aria-label="Search the catalogue"
+                value={text}
+                onChange={(e) => {
+                  setText(e.target.value)
+                  applyText(e.target.value)
+                }}
+              />
+              {text && (
+                <button
+                  type="button"
+                  className={styles.clearSearch}
+                  aria-label="Clear search"
+                  onClick={() => {
+                    setText('')
+                    applyText('')
+                    applyText.flush()
+                  }}
+                >
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    close
+                  </span>
+                </button>
+              )}
+            </form>
             <Link href="/publish/1" className={styles.publishButton}>
               <span className="material-symbols-rounded" aria-hidden="true">
                 upload
@@ -389,49 +430,6 @@ export default function SearchPage({
               Publish an asset
             </Link>
           </div>
-          <form
-            className={styles.search}
-            role="search"
-            onSubmit={(e) => {
-              e.preventDefault()
-              applyText.flush()
-            }}
-          >
-            <span
-              className={`material-symbols-rounded ${styles.searchIcon}`}
-              aria-hidden="true"
-            >
-              search
-            </span>
-            <input
-              id="catalogue-search"
-              type="search"
-              className={styles.searchInput}
-              placeholder="Search datasets, algorithms, tags or publishers"
-              aria-label="Search the catalogue"
-              value={text}
-              onChange={(e) => {
-                setText(e.target.value)
-                applyText(e.target.value)
-              }}
-            />
-            {text && (
-              <button
-                type="button"
-                className={styles.clearSearch}
-                aria-label="Clear search"
-                onClick={() => {
-                  setText('')
-                  applyText('')
-                  applyText.flush()
-                }}
-              >
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  close
-                </span>
-              </button>
-            )}
-          </form>
           <div className={styles.tabs} role="tablist" aria-label="Asset type">
             {TYPE_TABS.map((tab) => (
               <button

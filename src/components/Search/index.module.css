@@ -21,25 +21,30 @@
   margin-bottom: 32px;
 }
 
-.titleRow {
+.searchRow {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  align-items: stretch; /* the button takes the search bar's height */
   gap: 16px;
   flex-wrap: wrap;
+}
+
+.searchRow .search {
+  flex: 1 1 22rem;
 }
 
 .publishButton {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
-  padding: 12px 22px;
+  margin: 0;
+  min-height: 58px; /* = search bar (56px input + 1px borders) */
+  padding: 0 24px;
+  border-radius: 14px;
   border: 1px solid #316aea;
-  border-radius: 8px;
   background: #316aea;
   color: #ffffff;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  white-space: nowrap;
   font-weight: 600;
   text-decoration: none;
   transition: background 0.2s ease, color 0.2s ease;
