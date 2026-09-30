@@ -208,7 +208,7 @@
 .footer {
   background: #0c1a3a;
   color: #ffffff;
-  padding: 64px 0 20px;
+  padding: 64px 0 0;
   margin-top: auto;
 }
 
@@ -258,8 +258,8 @@
   color: #ffffff;
 }
 
-/* under the line: logo hard-left, copyright hard-right — kept tight vertically */
-/* Two groups, each [logo + text]: ODL + copyright left, PZH co-financing right */
+/* Two groups, each [logo + text]: ODL + copyright left, PZH co-financing right.
+   Equal padding above and below keeps the logos vertically centered under the line. */
 .footerBottom {
   --footer-logo-h: 2.75rem; /* shared by the ODL and PZH logos (small, ~40px visible) */
   display: flex;
@@ -267,7 +267,7 @@
   justify-content: space-between;
   gap: 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  padding-top: 8px;
+  padding: 24px 0;
 }
 
 .footerGroup {
