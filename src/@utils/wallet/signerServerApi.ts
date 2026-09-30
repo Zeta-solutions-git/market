@@ -1,3 +1,4 @@
+import { formatEther } from 'ethers'
 import type { Address, Hex } from 'viem'
 import { getCookieValue } from '../cookies'
 
@@ -29,6 +30,75 @@ type SignerServerHealthResponse = {
   status?: string
 }
 
+// Our proxy answers with { error }, the signer server itself with { message }
+type SignerServerErrorResponse = {
+  error?: string
+  message?: string | string[]
+}
+
+const INSUFFICIENT_FUNDS_PATTERN = /has (\d+) wei, needs at least (\d+) wei/i
+
+export class SignerServerError extends Error {
+  status: number
+
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'SignerServerError'
+    this.status = status
+  }
+}
+
+export class InsufficientFundsError extends SignerServerError {
+  constructor(message: string, status: number) {
+    super(message, status)
+    this.name = 'InsufficientFundsError'
+  }
+}
+
+// ocean.js catches failed sends and returns null, so the reason is lost
+// before it reaches the order flow. Keep the last failure to rethrow there.
+let lastSignerServerError: SignerServerError | undefined
+
+export function clearLastSignerServerError() {
+  lastSignerServerError = undefined
+}
+
+export function takeLastSignerServerError() {
+  const error = lastSignerServerError
+  lastSignerServerError = undefined
+  return error
+}
+
+function formatWeiAsEth(wei: string): string {
+  const eth = Number(formatEther(BigInt(wei)))
+  return `${eth.toLocaleString('en-US', { maximumSignificantDigits: 4 })} ETH`
+}
+
+function toSignerServerError(
+  data: SignerServerErrorResponse,
+  status: number
+): SignerServerError {
+  const serverMessage =
+    data.error ||
+    (Array.isArray(data.message) ? data.message.join(', ') : data.message) ||
+    'Signer server request failed.'
+
+  if (!/insufficient funds/i.test(serverMessage)) {
+    return new SignerServerError(serverMessage, status)
+  }
+
+  const amounts = serverMessage.match(INSUFFICIENT_FUNDS_PATTERN)
+  const message = amounts
+    ? `Insufficient funds: your wallet has ${formatWeiAsEth(
+        amounts[1]
+      )}, but this transaction needs at least ${formatWeiAsEth(
+        amounts[2]
+      )} for gas. Please top up your wallet and try again.`
+    : 'Insufficient funds: your wallet does not have enough ETH to pay for this transaction. Please top up your wallet and try again.'
+
+  return new InsufficientFundsError(message, status)
+}
+
 async function signerServerRequest<T>(
   path: string,
   init?: RequestInit
@@ -45,12 +115,14 @@ async function signerServerRequest<T>(
       ...(init?.headers || {})
     }
   })
-  const data = (await response.json().catch(() => ({}))) as {
-    error?: string
-  }
+  const data = (await response
+    .json()
+    .catch(() => ({}))) as SignerServerErrorResponse
 
   if (!response.ok) {
-    throw new Error(data.error || 'Signer server request failed.')
+    const error = toSignerServerError(data, response.status)
+    lastSignerServerError = error
+    throw error
   }
 
   return data as T

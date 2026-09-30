@@ -27,6 +27,10 @@ import { Service } from 'src/@types/ddo/Service'
 import { AssetExtended } from 'src/@types/AssetExtended'
 import { getTokenInfo } from './wallet'
 import { getConsumeMarketFeeWei } from './consumeMarketFee'
+import {
+  clearLastSignerServerError,
+  takeLastSignerServerError
+} from './wallet/signerServerApi'
 
 export async function initializeProvider(
   asset: AssetExtended,
@@ -106,6 +110,7 @@ export async function order(
   providerFees?: ProviderFees,
   computeConsumerAddress?: string
 ): Promise<TransactionResponse> {
+  clearLastSignerServerError()
   const datatoken = new Datatoken(
     signer as any,
     asset.credentialSubject?.chainId
@@ -379,7 +384,10 @@ export async function order(
   }
 
   if (txResponse) return txResponse
-  throw new Error('Order function failed to return a transaction.')
+  throw (
+    takeLastSignerServerError() ||
+    new Error('Order function failed to return a transaction.')
+  )
 }
 
 /**
@@ -465,6 +473,7 @@ export async function handleComputeOrder(
     asset?.credentialSubject?.metadata?.type
   )
   LoggerInstance.log('[compute] Using initializeData:', initializeData)
+  clearLastSignerServerError()
 
   try {
     if (accessDetails.validOrderTx) {
@@ -492,7 +501,10 @@ export async function handleComputeOrder(
         )
 
         if (!txApproveProvider)
-          throw new Error('Failed to approve provider fees!')
+          throw (
+            takeLastSignerServerError() ||
+            new Error('Failed to approve provider fees!')
+          )
 
         LoggerInstance.log(
           '[compute] Approved provider fees:',
@@ -516,7 +528,10 @@ export async function handleComputeOrder(
           initializeData.validOrder,
           initializeData.providerFee
         )
-        if (!txReuseOrder) throw new Error('Failed to reuse order!')
+        if (!txReuseOrder)
+          throw (
+            takeLastSignerServerError() || new Error('Failed to reuse order!')
+          )
 
         const tx = await txReuseOrder.wait()
         return tx?.hash

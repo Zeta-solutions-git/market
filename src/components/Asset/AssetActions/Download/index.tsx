@@ -56,6 +56,7 @@ import { getDefaultValues } from '../ConsumerParameters/FormConsumerParameters'
 import { getTokenInfo, getTokenBalance } from '@utils/wallet'
 import useBalance from '@hooks/useBalance'
 import { getConsumeMarketFeeWei } from '@utils/consumeMarketFee'
+import { InsufficientFundsError } from '@utils/wallet/signerServerApi'
 import {
   isPolicyServerConsumptionDisabled,
   requiresPolicyServerCredentialCheck,
@@ -377,6 +378,11 @@ export default function Download({
         error?.message?.includes('MetaMask Tx Signature: User denied')
       ) {
         toast.info('Transaction was cancelled by user')
+        return
+      }
+
+      if (error instanceof InsufficientFundsError) {
+        toast.error(error.message)
         return
       }
 
