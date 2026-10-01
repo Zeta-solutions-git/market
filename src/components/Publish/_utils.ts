@@ -58,6 +58,7 @@ import {
 import { isS3File, getS3Access } from 'src/@types/S3File'
 import * as VCDataModel from 'src/@types/ddo/VerifiableCredential'
 import { convertLinks, keyValuePairsToRecord } from '@utils/links'
+import { withSatelliteViewer } from '@utils/satelliteViewer'
 import { License } from 'src/@types/ddo/License'
 import { RemoteObject } from 'src/@types/ddo/RemoteObject'
 import base64url from 'base64url'
@@ -590,6 +591,7 @@ export async function transformPublishFormToDdo(
     providedBy,
     copyrightHolder,
     termsAndConditions,
+    satelliteViewer,
     dockerImage,
     dockerImageCustom,
     dockerImageCustomTag,
@@ -716,9 +718,10 @@ export async function transformPublishFormToDdo(
     author,
     links: keyValuePairsToRecord(metadata.links),
     license,
-    additionalInformation: {
-      termsAndConditions
-    },
+    additionalInformation: withSatelliteViewer(
+      { termsAndConditions },
+      satelliteViewer
+    ),
     ...(type === 'algorithm' &&
       dockerImage !== '' && {
         algorithm: {

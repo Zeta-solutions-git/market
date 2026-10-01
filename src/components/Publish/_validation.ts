@@ -210,6 +210,7 @@ const validationMetadata = {
       then: Yup.string().required('Required')
     })
   }),
+  satelliteViewer: Yup.boolean(),
   termsAndConditions: Yup.boolean()
     .required('Required')
     .isTrue('Please agree to the Terms and Conditions.'),

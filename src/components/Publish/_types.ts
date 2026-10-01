@@ -76,6 +76,7 @@ export interface FormPublishData {
     providedBy?: string
     copyrightHolder?: string
     links?: KeyValuePair[]
+    satelliteViewer?: boolean
     termsAndConditions: boolean
     license?: License
     tags?: string[]

@@ -82,6 +82,14 @@
         "help": "Related links for this asset as a mapping of titles to URLs. Enter a Title and its URL, then click Add. Repeat to add more (e.g. website, demo)."
       },
       {
+        "name": "satelliteViewer",
+        "label": "Satellite viewer",
+        "help": "Adds an interactive map of the Netherlands to the asset page. Buyers can draw an area or pick provinces, municipalities or neighbourhoods and copy it as GeoJSON, for example to fill in an area parameter. Useful for geospatial data such as satellite imagery.",
+        "type": "checkbox",
+        "options": ["Show a satellite viewer on the asset page"],
+        "required": false
+      },
+      {
         "name": "license",
         "label": "URL",
         "placeholder": "e.g. https://file.com/license.json",

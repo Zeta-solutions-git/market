@@ -26,6 +26,7 @@ import { AssetExtended } from 'src/@types/AssetExtended'
 import { customProviderUrl, encryptAsset } from '../../../../app.config.cjs'
 import { isAddress, Signer, toBeHex } from 'ethers'
 import { keyValuePairsToRecord } from '@utils/links'
+import { withSatelliteViewer } from '@utils/satelliteViewer'
 import { AdditionalVerifiableCredentials } from 'src/@types/ddo/AdditionalVerifiableCredentials'
 import { useSsiWallet } from '@context/SsiWallet'
 import { State } from 'src/@types/ddo/State'
@@ -132,9 +133,10 @@ export default function Edit({
         copyrightHolder: values.copyrightHolder || '',
         tags: values.tags,
         license,
-        additionalInformation: {
-          ...asset.credentialSubject?.metadata?.additionalInformation
-        }
+        additionalInformation: withSatelliteViewer(
+          asset.credentialSubject?.metadata?.additionalInformation,
+          values.satelliteViewer
+        )
       }
 
       if (asset.credentialSubject?.metadata.type === 'algorithm') {

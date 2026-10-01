@@ -171,6 +171,7 @@ export const metadataValidationSchema = Yup.object().shape({
   description: Yup.string().required('Required').min(10),
   copyrightHolder: Yup.string().nullable(),
   providedBy: testOptionalUrl('Provided By must be a valid URL.'),
+  satelliteViewer: Yup.boolean(),
   links: Yup.array()
     .of(
       Yup.object().shape({

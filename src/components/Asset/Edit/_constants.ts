@@ -26,6 +26,7 @@ import { convertToPolicyType } from '@components/@shared/PolicyEditor/utils'
 import { AdditionalVerifiableCredentials } from 'src/@types/ddo/AdditionalVerifiableCredentials'
 import { State } from 'src/@types/ddo/State'
 import { recordToKeyValuePairs } from '@utils/links'
+import { SATELLITE_VIEWER_KEY } from '@utils/satelliteViewer'
 import { normalizeDockerImageReference } from '@utils/docker'
 
 export const defaultServiceComputeOptions: Compute = {
@@ -344,6 +345,8 @@ export function getInitialValues(
     descriptionDirection: metadata?.description?.['@direction'] || 'ltr',
     type: metadata?.type,
     links: recordToKeyValuePairs(metadata?.links),
+    satelliteViewer:
+      metadata?.additionalInformation?.[SATELLITE_VIEWER_KEY] === true,
     author: metadata?.author,
     providedBy: metadata?.providedBy || '',
     copyrightHolder: metadata?.copyrightHolder || '',

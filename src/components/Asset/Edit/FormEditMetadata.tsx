@@ -271,6 +271,11 @@ export default function FormEditMetadata(): ReactElement {
             hideLabel
           />
         </SectionContainer>
+        <Field
+          {...getFieldContent('satelliteViewer', data)}
+          component={Input}
+          name="satelliteViewer"
+        />
         {asset.credentialSubject?.metadata?.type === 'algorithm' && (
           <>
             <SectionContainer title="Docker configuration" required>

@@ -11,6 +11,7 @@ import { Metadata } from 'src/@types/ddo/Metadata'
 import { Credential } from 'src/@types/ddo/Credentials'
 import { AssetExtended } from 'src/@types/AssetExtended'
 import { keyValuePairsToRecord } from '@utils/links'
+import { withSatelliteViewer } from '@utils/satelliteViewer'
 import { State } from 'src/@types/ddo/State'
 
 export default function DebugEditMetadata({
@@ -39,9 +40,10 @@ export default function DebugEditMetadata({
         copyrightHolder: values.copyrightHolder || '',
         tags: values.tags,
         license: values.license,
-        additionalInformation: {
-          ...asset?.credentialSubject?.metadata?.additionalInformation
-        }
+        additionalInformation: withSatelliteViewer(
+          asset?.credentialSubject?.metadata?.additionalInformation,
+          values.satelliteViewer
+        )
       }
 
       if (asset.credentialSubject?.metadata.type === 'algorithm') {

@@ -26,6 +26,7 @@ export interface MetadataEditForm {
   descriptionDirection?: string
   type: string
   links?: KeyValuePair[]
+  satelliteViewer?: boolean
   author?: string
   providedBy?: string
   copyrightHolder?: string

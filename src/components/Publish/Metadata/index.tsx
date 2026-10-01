@@ -105,6 +105,11 @@ export default function MetadataFields(): ReactElement {
           hideLabel
         />
       </SectionContainer>
+      <Field
+        {...getFieldContent('satelliteViewer', content.metadata.fields)}
+        component={Input}
+        name="metadata.satelliteViewer"
+      />
 
       <Field
         {...getFieldContent('type', content.metadata.fields)}

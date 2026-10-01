@@ -86,6 +86,7 @@ export const initialValues: FormPublishData = {
     providedBy: '',
     copyrightHolder: '',
     links: [],
+    satelliteViewer: false,
     termsAndConditions: false,
     dockerImage: '',
     dockerImageCustom: '',
