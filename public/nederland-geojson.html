@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nederland in GeoJSON</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@geoman-io/leaflet-geoman-free@2.20.2/dist/leaflet-geoman.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #15232e;
+        --ink-soft: #4b5b67;
+        --line: #d5dde2;
+        --surface: #f5f7f8;
+        --panel: #ffffff;
+        --polder: #1d4f73;
+        --oranje: #e8620f;
+        --oranje-dark: #a94300;
+        --focus: #1d4f73;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        font-family: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        color: var(--ink);
+        background: var(--surface);
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        height: 100dvh;
+        font-size: 15px;
+        line-height: 1.45;
+      }
+      #map {
+        height: 100%;
+        background: #e6ecef;
+      }
+
+      #panel {
+        background: var(--panel);
+        border-right: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .scroll {
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
+        padding: 0 20px 16px;
+      }
+      header {
+        padding: 20px 20px 12px;
+      }
+      h1 {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0 0 4px;
+        letter-spacing: -0.01em;
+      }
+      header p {
+        margin: 0;
+        color: var(--ink-soft);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 4px;
+        padding: 0 20px;
+        border-bottom: 1px solid var(--line);
+      }
+      .tabs button {
+        font: inherit;
+        font-weight: 600;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 10px 12px;
+        color: var(--ink-soft);
+        border-bottom: 3px solid transparent;
+        margin-bottom: -1px;
+      }
+      .tabs button[aria-selected='true'] {
+        color: var(--ink);
+        border-bottom-color: var(--oranje);
+      }
+
+      .tabpanel {
+        padding-top: 16px;
+      }
+      .hint {
+        color: var(--ink-soft);
+        margin: 0 0 14px;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+      select,
+      input[type='text'],
+      input[type='search'] {
+        display: block;
+        width: 100%;
+        margin-top: 4px;
+        font: inherit;
+        font-weight: 400;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--ink);
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+      .row > * {
+        flex: 1;
+      }
+
+      button.btn {
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--ink);
+      }
+      button.btn:hover {
+        background: var(--surface);
+      }
+      button.btn.primary {
+        background: var(--oranje);
+        border-color: var(--oranje);
+        color: #fff;
+      }
+      button.btn.primary:hover {
+        background: var(--oranje-dark);
+        border-color: var(--oranje-dark);
+      }
+      button.btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .btn.small {
+        padding: 5px 10px;
+        font-size: 13px;
+      }
+      :focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: 2px;
+      }
+
+      .status {
+        font-size: 13px;
+        color: var(--ink-soft);
+        min-height: 1.4em;
+        margin: 4px 0 10px;
+      }
+      .status.error {
+        color: #b42318;
+      }
+
+      ul.list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border-top: 1px solid var(--line);
+      }
+      ul.list li {
+        border-bottom: 1px solid var(--line);
+      }
+      .area-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 7px 4px;
+        background: none;
+        border: none;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        color: var(--ink);
+      }
+      .area-item:hover {
+        background: var(--surface);
+      }
+      .box {
+        width: 16px;
+        height: 16px;
+        border: 1.5px solid #8a99a4;
+        border-radius: 3px;
+        flex: none;
+        display: grid;
+        place-items: center;
+      }
+      .area-item[aria-checked='true'] .box {
+        background: var(--oranje);
+        border-color: var(--oranje);
+      }
+      .area-item[aria-checked='true'] .box::after {
+        content: '';
+        width: 8px;
+        height: 4px;
+        border: 2px solid #fff;
+        border-top: 0;
+        border-right: 0;
+        transform: rotate(-45deg) translate(1px, -1px);
+      }
+      .area-item .code {
+        margin-left: auto;
+        color: var(--ink-soft);
+        font-size: 12px;
+      }
+
+      .drawn-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+      }
+      .drawn-item .type {
+        font-size: 12px;
+        color: var(--ink-soft);
+        width: 62px;
+        flex: none;
+      }
+      .drawn-item input {
+        margin: 0;
+        padding: 5px 8px;
+      }
+      .icon-btn {
+        background: none;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 4px 6px;
+        font: inherit;
+        font-size: 13px;
+        color: var(--ink-soft);
+      }
+      .icon-btn:hover {
+        border-color: var(--line);
+        color: var(--ink);
+      }
+      .empty {
+        color: var(--ink-soft);
+        font-style: italic;
+      }
+
+      .export {
+        border-top: 1px solid var(--line);
+        padding: 14px 20px 18px;
+        background: var(--panel);
+      }
+      .export-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 8px;
+      }
+      .export-head span {
+        font-size: 12px;
+        color: var(--ink-soft);
+      }
+      textarea {
+        width: 100%;
+        height: 110px;
+        resize: vertical;
+        font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 11.5px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px;
+        color: var(--ink-soft);
+        background: var(--surface);
+        margin-bottom: 10px;
+      }
+
+      .leaflet-container {
+        font-family: inherit;
+      }
+      .leaflet-tooltip {
+        font-family: inherit;
+        font-weight: 600;
+      }
+
+      @media (max-width: 760px) {
+        body {
+          grid-template-columns: 1fr;
+          grid-template-rows: 50dvh 1fr;
+        }
+        #map {
+          grid-row: 1;
+        }
+        #panel {
+          grid-row: 2;
+          border-right: none;
+          border-top: 1px solid var(--line);
+        }
+        header {
+          padding-top: 14px;
+        }
+        h1 {
+          font-size: 19px;
+        }
+        textarea {
+          height: 70px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <aside id="panel">
+      <header>
+        <h1>Nederland in GeoJSON</h1>
+        <p>
+          Teken een eigen gebied of kies provincies, gemeenten, wijken en
+          buurten, en download ze als GeoJSON.
+        </p>
+      </header>
+
+      <div class="tabs" role="tablist">
+        <button
+          role="tab"
+          id="tabbtn-draw"
+          aria-selected="true"
+          aria-controls="tab-draw"
+          data-tab="draw"
+        >
+          Zelf tekenen
+        </button>
+        <button
+          role="tab"
+          id="tabbtn-areas"
+          aria-selected="false"
+          aria-controls="tab-areas"
+          data-tab="areas"
+        >
+          Gebieden kiezen
+        </button>
+      </div>
+
+      <div class="scroll">
+        <section
+          id="tab-draw"
+          class="tabpanel"
+          role="tabpanel"
+          aria-labelledby="tabbtn-draw"
+        >
+          <p class="hint">
+            Kies een vorm in de werkbalk links op de kaart. Sluit een vlak af
+            door op het eerste punt te klikken. Geef objecten eventueel een
+            naam; die komt in de properties.
+          </p>
+          <ul id="drawn-list" class="list"></ul>
+          <p id="drawn-empty" class="empty">Nog niets getekend.</p>
+          <button id="clear-drawn" class="btn small" hidden>
+            Alles wissen
+          </button>
+        </section>
+
+        <section
+          id="tab-areas"
+          class="tabpanel"
+          role="tabpanel"
+          aria-labelledby="tabbtn-areas"
+          hidden
+        >
+          <div class="row">
+            <label
+              >Niveau
+              <select id="level">
+                <option value="provincie">Provincies</option>
+                <option value="gemeente" selected>Gemeenten</option>
+                <option value="wijk">Wijken in een gemeente</option>
+                <option value="buurt">Buurten in een gemeente</option>
+              </select>
+            </label>
+            <label
+              >Jaar
+              <select id="year"></select>
+            </label>
+          </div>
+
+          <div id="gm-wrap" hidden>
+            <label
+              >Gemeente
+              <input
+                id="gm-input"
+                type="text"
+                list="gm-list"
+                placeholder="Typ een gemeentenaam"
+                autocomplete="off"
+              />
+              <datalist id="gm-list"></datalist>
+            </label>
+            <button id="gm-load" class="btn" style="margin-bottom: 12px">
+              Wijken laden
+            </button>
+          </div>
+
+          <label
+            >Filter op naam
+            <input id="filter" type="search" placeholder="Bijv. Amsterdam" />
+          </label>
+
+          <div class="row" style="margin-bottom: 6px">
+            <button id="sel-all" class="btn small">Zichtbare selecteren</button>
+            <button id="sel-none" class="btn small">Selectie wissen</button>
+          </div>
+          <p id="status" class="status" role="status"></p>
+          <ul id="area-list" class="list"></ul>
+        </section>
+      </div>
+
+      <footer class="export">
+        <div class="export-head">
+          <strong id="export-count">0 objecten</strong>
+          <span>WGS84, 6 decimalen</span>
+        </div>
+        <textarea
+          id="preview"
+          readonly
+          spellcheck="false"
+          aria-label="GeoJSON-voorbeeld"
+        ></textarea>
+        <div class="row">
+          <button id="download" class="btn primary">Download .geojson</button>
+          <button id="copy" class="btn">Kopieer</button>
+        </div>
+      </footer>
+    </aside>
+
+    <main id="map" aria-label="Kaart van Nederland"></main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@geoman-io/leaflet-geoman-free@2.20.2/dist/leaflet-geoman.min.js"></script>
+    <script>
+      ;(() => {
+        /* ---------- Kaart en achtergronden (PDOK, geen API-key nodig) ---------- */
+        const map = L.map('map', { zoomControl: true }).setView([52.2, 5.35], 8)
+
+        const pdokAttr =
+          'Kaart © <a href="https://www.kadaster.nl">Kadaster</a> / <a href="https://www.pdok.nl">PDOK</a>'
+        const brt = (style) =>
+          L.tileLayer(
+            `https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/${style}/EPSG:3857/{z}/{x}/{y}.png`,
+            {
+              maxZoom: 21,
+              maxNativeZoom: 19,
+              minZoom: 6,
+              attribution: pdokAttr
+            }
+          )
+        const bases = {
+          Topografisch: brt('standaard'),
+          Grijs: brt('grijs'),
+          Pastel: brt('pastel'),
+          Luchtfoto: L.tileLayer(
+            'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg',
+            {
+              maxZoom: 21,
+              maxNativeZoom: 19,
+              minZoom: 6,
+              attribution: pdokAttr
+            }
+          )
+        }
+        bases['Grijs'].addTo(map)
+        L.control.layers(bases, null, { position: 'topright' }).addTo(map)
+
+        /* ---------- Hulpfuncties ---------- */
+        const $ = (id) => document.getElementById(id)
+        const round6 = (c) =>
+          typeof c[0] === 'number'
+            ? [Math.round(c[0] * 1e6) / 1e6, Math.round(c[1] * 1e6) / 1e6]
+            : c.map(round6)
+        const roundFeature = (f) => ({
+          ...f,
+          geometry: f.geometry && {
+            ...f.geometry,
+            coordinates: round6(f.geometry.coordinates)
+          }
+        })
+        const fc = (features) => ({
+          type: 'FeatureCollection',
+          features: features.map(roundFeature)
+        })
+        const slug = (s) =>
+          s
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
+
+        function bboxOf(geom) {
+          let minX = Infinity,
+            minY = Infinity,
+            maxX = -Infinity,
+            maxY = -Infinity
+          ;(function walk(c) {
+            if (typeof c[0] === 'number') {
+              minX = Math.min(minX, c[0])
+              maxX = Math.max(maxX, c[0])
+              minY = Math.min(minY, c[1])
+              maxY = Math.max(maxY, c[1])
+            } else c.forEach(walk)
+          })(geom.coordinates)
+          return [minX, minY, maxX, maxY]
+        }
+
+        /* ---------- Tabs ---------- */
+        let activeTab = 'draw'
+        document.querySelectorAll('.tabs button').forEach((btn) => {
+          btn.addEventListener('click', () => setTab(btn.dataset.tab))
+        })
+
+        function setTab(tab) {
+          activeTab = tab
+          document
+            .querySelectorAll('.tabs button')
+            .forEach((b) =>
+              b.setAttribute('aria-selected', String(b.dataset.tab === tab))
+            )
+          $('tab-draw').hidden = tab !== 'draw'
+          $('tab-areas').hidden = tab !== 'areas'
+          if (tab === 'draw') {
+            map.pm.addControls(drawControls)
+            if (map.hasLayer(areaLayer)) map.removeLayer(areaLayer)
+          } else {
+            map.pm.disableDraw()
+            map.pm.disableGlobalEditMode()
+            map.pm.disableGlobalDragMode()
+            map.pm.disableGlobalRemovalMode()
+            map.pm.disableGlobalRotateMode()
+            map.pm.removeControls()
+            areaLayer.addTo(map)
+            if (!areas.loadedOnce) loadLevel()
+          }
+          updateExport()
+        }
+
+        /* ---------- Zelf tekenen (Leaflet-Geoman) ---------- */
+        const drawnGroup = L.featureGroup().addTo(map)
+        const names = new Map() // leafletId -> naam
+        const drawControls = {
+          position: 'topleft',
+          drawCircle: false, // cirkels bestaan niet in GeoJSON
+          drawCircleMarker: false,
+          drawText: false,
+          cutPolygon: false
+        }
+        map.pm.setLang('nl')
+        map.pm.setGlobalOptions({
+          layerGroup: drawnGroup,
+          pathOptions: { color: '#e8620f', weight: 2.5, fillOpacity: 0.25 }
+        })
+        map.pm.addControls(drawControls)
+
+        map.on('pm:create', (e) => {
+          names.set(L.stamp(e.layer), '')
+          e.layer.on('pm:edit pm:dragend pm:rotateend', refreshDrawn)
+          refreshDrawn()
+        })
+        map.on('pm:remove', (e) => {
+          drawnGroup.removeLayer(e.layer)
+          names.delete(L.stamp(e.layer))
+          refreshDrawn()
+        })
+
+        function typeLabel(layer) {
+          if (layer instanceof L.Marker) return 'Punt'
+          if (layer instanceof L.Rectangle) return 'Rechthoek'
+          if (layer instanceof L.Polygon) return 'Vlak'
+          if (layer instanceof L.Polyline) return 'Lijn'
+          return 'Object'
+        }
+
+        function drawnFeatures() {
+          return drawnGroup.getLayers().map((layer) => {
+            const f = layer.toGeoJSON()
+            const naam = names.get(L.stamp(layer))
+            f.properties = naam ? { naam } : {}
+            return f
+          })
+        }
+
+        function refreshDrawn() {
+          const list = $('drawn-list')
+          list.innerHTML = ''
+          const layers = drawnGroup.getLayers()
+          $('drawn-empty').hidden = layers.length > 0
+          $('clear-drawn').hidden = layers.length === 0
+          layers.forEach((layer, i) => {
+            const id = L.stamp(layer)
+            const li = document.createElement('li')
+            li.className = 'drawn-item'
+            li.innerHTML = `<span class="type">${typeLabel(layer)}</span>`
+            const input = document.createElement('input')
+            input.type = 'text'
+            input.placeholder = `Naam (optioneel)`
+            input.value = names.get(id) || ''
+            input.setAttribute('aria-label', `Naam voor object ${i + 1}`)
+            input.addEventListener('input', () => {
+              names.set(id, input.value.trim())
+              updateExport()
+            })
+            const zoom = document.createElement('button')
+            zoom.className = 'icon-btn'
+            zoom.textContent = 'Zoom'
+            zoom.addEventListener('click', () => {
+              if (layer.getLatLng)
+                map.setView(layer.getLatLng(), Math.max(map.getZoom(), 15))
+              else map.fitBounds(layer.getBounds(), { padding: [40, 40] })
+            })
+            const del = document.createElement('button')
+            del.className = 'icon-btn'
+            del.textContent = 'Verwijder'
+            del.addEventListener('click', () => {
+              drawnGroup.removeLayer(layer)
+              names.delete(id)
+              refreshDrawn()
+            })
+            li.append(input, zoom, del)
+            list.append(li)
+          })
+          updateExport()
+        }
+
+        $('clear-drawn').addEventListener('click', () => {
+          drawnGroup.clearLayers()
+          names.clear()
+          refreshDrawn()
+        })
+
+        /* ---------- Gebieden kiezen (CBS gebiedsindelingen via PDOK OGC API) ---------- */
+        const API =
+          'https://api.pdok.nl/cbs/gebiedsindelingen/ogc/v1/collections/'
+        const LEVELS = {
+          provincie: { col: 'provincie_gegeneraliseerd', plural: 'provincies' },
+          gemeente: { col: 'gemeente_gegeneraliseerd', plural: 'gemeenten' },
+          wijk: { col: 'wijk_gegeneraliseerd', plural: 'wijken', prefix: 'WK' },
+          buurt: {
+            col: 'buurt_gegeneraliseerd',
+            plural: 'buurten',
+            prefix: 'BU'
+          }
+        }
+
+        const thisYear = new Date().getFullYear()
+        for (let y = thisYear; y >= 2016; y--)
+          $('year').add(new Option(String(y), String(y)))
+
+        const areas = {
+          loadedOnce: false,
+          features: [],
+          selected: new Set(),
+          layers: new Map(),
+          cache: new Map(),
+          label: '',
+          usedYear: thisYear,
+          requestId: 0
+        }
+        const renderer = L.canvas({ padding: 0.5 })
+        const areaLayer = L.featureGroup()
+
+        const baseStyle = {
+          color: '#1d4f73',
+          weight: 1,
+          fillColor: '#1d4f73',
+          fillOpacity: 0.06,
+          renderer
+        }
+        const selStyle = {
+          color: '#a94300',
+          weight: 2,
+          fillColor: '#e8620f',
+          fillOpacity: 0.45,
+          renderer
+        }
+
+        function setStatus(text, isError = false) {
+          $('status').textContent = text
+          $('status').classList.toggle('error', isError)
+        }
+
+        async function fetchAll(url) {
+          const out = []
+          let next = url,
+            pages = 0
+          while (next && pages < 60) {
+            const res = await fetch(next, {
+              headers: { Accept: 'application/geo+json' }
+            })
+            if (!res.ok)
+              throw new Error(`PDOK antwoordde met status ${res.status}`)
+            const json = await res.json()
+            out.push(...(json.features || []))
+            const link = (json.links || []).find((l) => l.rel === 'next')
+            next = link ? link.href : null
+            pages++
+          }
+          return out
+        }
+
+        // Haalt een collectie op voor een jaar; valt terug op het jaar ervoor als er (nog) geen data is.
+        async function getCollection(col, year, bbox) {
+          for (const y of [year, year - 1]) {
+            const key = `${col}|${y}|${bbox ? bbox.join(',') : ''}`
+            if (!areas.cache.has(key)) {
+              let url = `${API}${col}/items?f=json&limit=1000&datetime=${y}-07-01T00:00:00Z`
+              if (bbox)
+                url += `&bbox=${bbox.map((n) => n.toFixed(6)).join(',')}`
+              const feats = (await fetchAll(url)).filter(
+                (f) =>
+                  !f.properties.jaarcode || Number(f.properties.jaarcode) === y
+              )
+              areas.cache.set(key, feats)
+            }
+            const feats = areas.cache.get(key)
+            if (feats.length) return { feats, year: y }
+          }
+          return { feats: [], year }
+        }
+
+        async function loadLevel() {
+          areas.loadedOnce = true
+          const level = $('level').value
+          const year = Number($('year').value)
+          const def = LEVELS[level]
+          $('gm-wrap').hidden = !def.prefix
+          $(
+            'gm-load'
+          ).textContent = `${def.plural[0].toUpperCase()}${def.plural.slice(
+            1
+          )} laden`
+          areas.selected.clear()
+
+          // Gemeentelijst voor de keuze bij wijken/buurten
+          if (def.prefix) {
+            showFeatures([], '')
+            const req = ++areas.requestId
+            setStatus('Gemeentelijst laden…')
+            try {
+              const { feats } = await getCollection(LEVELS.gemeente.col, year)
+              if (req !== areas.requestId) return
+              const dl = $('gm-list')
+              dl.innerHTML = ''
+              feats
+                .map((f) => f.properties.statnaam)
+                .sort((a, b) => a.localeCompare(b, 'nl'))
+                .forEach((n) => dl.append(new Option(n)))
+              setStatus(`Kies een gemeente om de ${def.plural} te laden.`)
+            } catch (err) {
+              setStatus(`Laden mislukt: ${err.message}`, true)
+            }
+            updateExport()
+            return
+          }
+
+          const req = ++areas.requestId
+          setStatus(
+            `${def.plural[0].toUpperCase()}${def.plural.slice(
+              1
+            )} ${year} laden…`
+          )
+          try {
+            const { feats, year: used } = await getCollection(def.col, year)
+            if (req !== areas.requestId) return
+            areas.usedYear = used
+            showFeatures(feats, `${level}-${used}`)
+            const note =
+              used !== year
+                ? ` (${year} is nog niet beschikbaar, ${used} gebruikt)`
+                : ''
+            setStatus(
+              `${feats.length} ${def.plural} geladen${note}. Klik op de kaart of in de lijst om te selecteren.`
+            )
+          } catch (err) {
+            setStatus(`Laden mislukt: ${err.message}`, true)
+          }
+        }
+
+        async function loadSubAreas() {
+          const level = $('level').value
+          const def = LEVELS[level]
+          const year = Number($('year').value)
+          const name = $('gm-input').value.trim().toLowerCase()
+          if (!name) {
+            setStatus('Typ eerst een gemeentenaam.', true)
+            return
+          }
+          const req = ++areas.requestId
+          try {
+            const { feats: gms, year: gmYear } = await getCollection(
+              LEVELS.gemeente.col,
+              year
+            )
+            const gm = gms.find(
+              (f) => f.properties.statnaam.toLowerCase() === name
+            )
+            if (!gm) {
+              setStatus(
+                `Gemeente "${
+                  $('gm-input').value
+                }" niet gevonden. Kies een naam uit de lijst.`,
+                true
+              )
+              return
+            }
+            setStatus(
+              `${def.plural[0].toUpperCase()}${def.plural.slice(1)} in ${
+                gm.properties.statnaam
+              } laden…`
+            )
+            const code = gm.properties.statcode.replace(/^GM/, '')
+            const { feats, year: used } = await getCollection(
+              def.col,
+              gmYear,
+              bboxOf(gm.geometry)
+            )
+            if (req !== areas.requestId) return
+            const inside = feats.filter((f) =>
+              String(f.properties.statcode).startsWith(def.prefix + code)
+            )
+            areas.usedYear = used
+            areas.selected.clear()
+            showFeatures(
+              inside,
+              `${def.plural}-${slug(gm.properties.statnaam)}-${used}`
+            )
+            setStatus(
+              inside.length
+                ? `${inside.length} ${def.plural} in ${gm.properties.statnaam} (${used}).`
+                : `Geen ${def.plural} gevonden voor ${gm.properties.statnaam} in ${used}.`,
+              !inside.length
+            )
+          } catch (err) {
+            setStatus(`Laden mislukt: ${err.message}`, true)
+          }
+        }
+
+        function showFeatures(feats, label) {
+          areas.features = feats
+          areas.label = label
+          areas.layers.clear()
+          areaLayer.clearLayers()
+          if (feats.length) {
+            const gj = L.geoJSON(feats, {
+              pmIgnore: true,
+              style: () => baseStyle,
+              onEachFeature: (f, layer) => {
+                const id = f.properties.statcode
+                areas.layers.set(id, layer)
+                layer.bindTooltip(f.properties.statnaam, {
+                  sticky: true,
+                  direction: 'top'
+                })
+                layer.on('click', () => toggle(id))
+              }
+            })
+            areaLayer.addLayer(gj)
+            map.fitBounds(gj.getBounds(), { padding: [20, 20] })
+          }
+          renderList()
+          updateExport()
+        }
+
+        function toggle(id, force) {
+          const on = force ?? !areas.selected.has(id)
+          on ? areas.selected.add(id) : areas.selected.delete(id)
+          const layer = areas.layers.get(id)
+          if (layer) layer.setStyle(on ? selStyle : baseStyle)
+          const btn = document.querySelector(
+            `.area-item[data-id="${CSS.escape(id)}"]`
+          )
+          if (btn) btn.setAttribute('aria-checked', String(on))
+          updateExport()
+        }
+
+        function visibleFeatures() {
+          const q = $('filter').value.trim().toLowerCase()
+          return areas.features
+            .filter(
+              (f) => !q || f.properties.statnaam.toLowerCase().includes(q)
+            )
+            .sort((a, b) =>
+              a.properties.statnaam.localeCompare(b.properties.statnaam, 'nl')
+            )
+        }
+
+        function renderList() {
+          const list = $('area-list')
+          list.innerHTML = ''
+          const frag = document.createDocumentFragment()
+          visibleFeatures().forEach((f) => {
+            const id = f.properties.statcode
+            const li = document.createElement('li')
+            const btn = document.createElement('button')
+            btn.className = 'area-item'
+            btn.dataset.id = id
+            btn.setAttribute('role', 'checkbox')
+            btn.setAttribute('aria-checked', String(areas.selected.has(id)))
+            btn.innerHTML = `<span class="box" aria-hidden="true"></span><span></span><span class="code">${id}</span>`
+            btn.children[1].textContent = f.properties.statnaam
+            btn.addEventListener('click', () => toggle(id))
+            btn.addEventListener('dblclick', () => {
+              const layer = areas.layers.get(id)
+              if (layer) map.fitBounds(layer.getBounds(), { padding: [40, 40] })
+            })
+            li.append(btn)
+            frag.append(li)
+          })
+          list.append(frag)
+        }
+
+        $('level').addEventListener('change', loadLevel)
+        $('year').addEventListener('change', () => {
+          const level = $('level').value
+          if (LEVELS[level].prefix && $('gm-input').value.trim()) {
+            loadLevel().then(loadSubAreas)
+          } else loadLevel()
+        })
+        $('gm-load').addEventListener('click', loadSubAreas)
+        $('gm-input').addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') loadSubAreas()
+        })
+        $('filter').addEventListener('input', renderList)
+        $('sel-all').addEventListener('click', () =>
+          visibleFeatures().forEach((f) => toggle(f.properties.statcode, true))
+        )
+        $('sel-none').addEventListener('click', () =>
+          [...areas.selected].forEach((id) => toggle(id, false))
+        )
+
+        /* ---------- Export ---------- */
+        function currentExport() {
+          if (activeTab === 'draw') {
+            return { data: fc(drawnFeatures()), filename: 'getekend.geojson' }
+          }
+          const chosen = areas.features.filter((f) =>
+            areas.selected.has(f.properties.statcode)
+          )
+          const filename =
+            chosen.length === 1
+              ? `${slug(chosen[0].properties.statnaam)}-${
+                  areas.usedYear
+                }.geojson`
+              : `${areas.label || 'selectie'}.geojson`
+          return { data: fc(chosen), filename }
+        }
+
+        function updateExport() {
+          const { data } = currentExport()
+          const n = data.features.length
+          $('export-count').textContent = `${n} ${
+            n === 1 ? 'object' : 'objecten'
+          }`
+          const text = JSON.stringify(data)
+          $('preview').value =
+            text.length > 20000
+              ? text.slice(0, 20000) +
+                ' … (ingekort in voorbeeld; download bevat alles)'
+              : text
+          $('download').disabled = n === 0
+          $('copy').disabled = n === 0
+        }
+
+        $('download').addEventListener('click', () => {
+          const { data, filename } = currentExport()
+          const blob = new Blob([JSON.stringify(data, null, 2)], {
+            type: 'application/geo+json'
+          })
+          const a = document.createElement('a')
+          a.href = URL.createObjectURL(blob)
+          a.download = filename
+          document.body.append(a)
+          a.click()
+          setTimeout(() => {
+            URL.revokeObjectURL(a.href)
+            a.remove()
+          }, 500)
+        })
+
+        $('copy').addEventListener('click', async () => {
+          const text = JSON.stringify(currentExport().data)
+          const btn = $('copy')
+          try {
+            await navigator.clipboard.writeText(text)
+          } catch {
+            const ta = document.createElement('textarea')
+            ta.value = text
+            document.body.append(ta)
+            ta.select()
+            document.execCommand('copy')
+            ta.remove()
+          }
+          btn.textContent = 'Gekopieerd'
+          setTimeout(() => {
+            btn.textContent = 'Kopieer'
+          }, 1500)
+        })
+
+        updateExport()
+      })()
+    </script>
+  </body>
+</html>

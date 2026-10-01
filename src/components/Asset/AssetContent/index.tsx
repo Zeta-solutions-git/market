@@ -31,6 +31,8 @@ import AllowedAlgorithms from './AllowedAlgorithms'
 import AccessPanel, { ServiceOption, servicePriceLabel } from './AccessPanel'
 import { useRouter } from 'next/router'
 import { toast } from 'react-toastify'
+import SatelliteViewer from './SatelliteViewer'
+import { hasSatelliteViewer } from '@utils/satelliteViewer'
 
 const blockscoutNetworks = [1287, 2021000, 2021001, 44787, 246, 1285]
 
@@ -108,6 +110,7 @@ export default function AssetContent({
   const description = getDescription(asset)
   const hasExternalContent = EXTERNAL_CONTENT.test(description)
   const showSamples = hasSampleFiles(asset)
+  const showSatelliteViewer = hasSatelliteViewer(asset)
 
   // keep the original service index: accessDetails and the actions use it
   const serviceOptions: ServiceOption[] = useMemo(
@@ -332,6 +335,8 @@ export default function AssetContent({
                   <SampleFilesDropdown services={services} defaultExpanded />
                 </section>
               )}
+
+              {showSatelliteViewer && <SatelliteViewer />}
 
               <section id="details" className={styles.section}>
                 <h2 className={styles.sectionTitle}>Details</h2>
