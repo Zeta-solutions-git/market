@@ -2,6 +2,13 @@ import * as isIPFS from 'is-ipfs'
 import { FileItem } from '@utils/fileItem'
 import { RemoteSource } from '../@types/ddo/RemoteSource'
 import axios from 'axios'
+import { getCookieValue } from '@utils/cookies'
+
+// /api/ipfs requires the session + double-submit CSRF token (see the route).
+function ipfsApiHeaders(): Record<string, string> {
+  const csrfToken = getCookieValue('__Host-csrf_token')
+  return csrfToken ? { 'X-CSRF-Token': csrfToken } : {}
+}
 
 export interface IpfsRemoteDocument {
   content: string
@@ -53,12 +60,14 @@ export async function uploadToIPFS(data: any): Promise<string> {
   try {
     const res = await fetch('/api/ipfs', {
       method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', ...ipfsApiHeaders() },
       body: JSON.stringify(data)
     })
 
     const result = await res.json()
     if (!result.success) {
-      throw new Error(result.message)
+      throw new Error(result.message || result.error)
     }
     return result.data
   } catch (error) {
@@ -103,6 +112,8 @@ export async function deleteIpfsFile(ipfsHash: string) {
   try {
     const res = await fetch('/api/ipfs', {
       method: 'DELETE',
+      credentials: 'same-origin',
+      headers: ipfsApiHeaders(),
       body: ipfsHash
     })
 
