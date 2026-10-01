@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Nederland in GeoJSON</title>
+    <title>Netherlands GeoJSON</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
@@ -308,6 +308,39 @@
         font-weight: 600;
       }
 
+      /* Toolbar labels show straight away on hover (native titles are slow and easy to miss) */
+      .leaflet-pm-toolbar .button-container[data-tip] {
+        position: relative;
+      }
+      .leaflet-pm-toolbar .button-container[data-tip]:hover::after {
+        content: attr(data-tip);
+        position: absolute;
+        left: calc(100% + 8px);
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--ink);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.2;
+        padding: 5px 8px;
+        border-radius: 5px;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 1000;
+      }
+      /* while a tool's own action buttons are open they sit in the same spot */
+      .leaflet-pm-toolbar .button-container.active:hover::after {
+        display: none;
+      }
+      .leaflet-pm-toolbar .button-container.pm-disabled {
+        opacity: 0.4;
+      }
+      .leaflet-pm-toolbar .leaflet-pm-icon-undo {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 14 4 9l5-5'/%3E%3Cpath d='M4 9h10.5a5.5 5.5 0 0 1 0 11H11'/%3E%3C/svg%3E");
+        background-size: 18px;
+      }
+
       @media (max-width: 760px) {
         body {
           grid-template-columns: 1fr;
@@ -341,10 +374,10 @@
   <body>
     <aside id="panel">
       <header>
-        <h1>Nederland in GeoJSON</h1>
+        <h1>Netherlands in GeoJSON</h1>
         <p>
-          Teken een eigen gebied of kies provincies, gemeenten, wijken en
-          buurten, en download ze als GeoJSON.
+          Draw your own area or pick provinces, municipalities, districts and
+          neighbourhoods, and export them as GeoJSON.
         </p>
       </header>
 
@@ -356,7 +389,7 @@
           aria-controls="tab-draw"
           data-tab="draw"
         >
-          Zelf tekenen
+          Draw
         </button>
         <button
           role="tab"
@@ -365,7 +398,7 @@
           aria-controls="tab-areas"
           data-tab="areas"
         >
-          Gebieden kiezen
+          Pick areas
         </button>
       </div>
 
@@ -377,15 +410,13 @@
           aria-labelledby="tabbtn-draw"
         >
           <p class="hint">
-            Kies een vorm in de werkbalk links op de kaart. Sluit een vlak af
-            door op het eerste punt te klikken. Geef objecten eventueel een
-            naam; die komt in de properties.
+            Pick a tool in the toolbar on the left of the map. To close a shape,
+            click its first point again. You can name each shape; the name goes
+            into its properties.
           </p>
           <ul id="drawn-list" class="list"></ul>
-          <p id="drawn-empty" class="empty">Nog niets getekend.</p>
-          <button id="clear-drawn" class="btn small" hidden>
-            Alles wissen
-          </button>
+          <p id="drawn-empty" class="empty">Nothing drawn yet.</p>
+          <button id="clear-drawn" class="btn small" hidden>Clear all</button>
         </section>
 
         <section
@@ -397,45 +428,45 @@
         >
           <div class="row">
             <label
-              >Niveau
+              >Level
               <select id="level">
-                <option value="provincie">Provincies</option>
-                <option value="gemeente" selected>Gemeenten</option>
-                <option value="wijk">Wijken in een gemeente</option>
-                <option value="buurt">Buurten in een gemeente</option>
+                <option value="provincie">Provinces</option>
+                <option value="gemeente" selected>Municipalities</option>
+                <option value="wijk">Districts in a municipality</option>
+                <option value="buurt">Neighbourhoods in a municipality</option>
               </select>
             </label>
             <label
-              >Jaar
+              >Year
               <select id="year"></select>
             </label>
           </div>
 
           <div id="gm-wrap" hidden>
             <label
-              >Gemeente
+              >Municipality
               <input
                 id="gm-input"
                 type="text"
                 list="gm-list"
-                placeholder="Typ een gemeentenaam"
+                placeholder="Type a municipality name"
                 autocomplete="off"
               />
               <datalist id="gm-list"></datalist>
             </label>
             <button id="gm-load" class="btn" style="margin-bottom: 12px">
-              Wijken laden
+              Load districts
             </button>
           </div>
 
           <label
-            >Filter op naam
-            <input id="filter" type="search" placeholder="Bijv. Amsterdam" />
+            >Filter by name
+            <input id="filter" type="search" placeholder="e.g. Amsterdam" />
           </label>
 
           <div class="row" style="margin-bottom: 6px">
-            <button id="sel-all" class="btn small">Zichtbare selecteren</button>
-            <button id="sel-none" class="btn small">Selectie wissen</button>
+            <button id="sel-all" class="btn small">Select visible</button>
+            <button id="sel-none" class="btn small">Clear selection</button>
           </div>
           <p id="status" class="status" role="status"></p>
           <ul id="area-list" class="list"></ul>
@@ -444,33 +475,33 @@
 
       <footer class="export">
         <div class="export-head">
-          <strong id="export-count">0 objecten</strong>
-          <span>WGS84, 6 decimalen</span>
+          <strong id="export-count">0 features</strong>
+          <span>WGS84, 6 decimals</span>
         </div>
         <textarea
           id="preview"
           readonly
           spellcheck="false"
-          aria-label="GeoJSON-voorbeeld"
+          aria-label="GeoJSON preview"
         ></textarea>
         <div class="row">
           <button id="download" class="btn primary">Download .geojson</button>
-          <button id="copy" class="btn">Kopieer</button>
+          <button id="copy" class="btn">Copy</button>
         </div>
       </footer>
     </aside>
 
-    <main id="map" aria-label="Kaart van Nederland"></main>
+    <main id="map" aria-label="Map of the Netherlands"></main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@geoman-io/leaflet-geoman-free@2.20.2/dist/leaflet-geoman.min.js"></script>
     <script>
       ;(() => {
-        /* ---------- Kaart en achtergronden (PDOK, geen API-key nodig) ---------- */
+        /* ---------- Map and base layers (PDOK, no API key needed) ---------- */
         const map = L.map('map', { zoomControl: true }).setView([52.2, 5.35], 8)
 
         const pdokAttr =
-          'Kaart © <a href="https://www.kadaster.nl">Kadaster</a> / <a href="https://www.pdok.nl">PDOK</a>'
+          'Map © <a href="https://www.kadaster.nl">Kadaster</a> / <a href="https://www.pdok.nl">PDOK</a>'
         const brt = (style) =>
           L.tileLayer(
             `https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/${style}/EPSG:3857/{z}/{x}/{y}.png`,
@@ -482,10 +513,10 @@
             }
           )
         const bases = {
-          Topografisch: brt('standaard'),
-          Grijs: brt('grijs'),
+          Topographic: brt('standaard'),
+          Grey: brt('grijs'),
           Pastel: brt('pastel'),
-          Luchtfoto: L.tileLayer(
+          'Aerial photo': L.tileLayer(
             'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg',
             {
               maxZoom: 21,
@@ -495,10 +526,10 @@
             }
           )
         }
-        bases['Grijs'].addTo(map)
+        bases['Grey'].addTo(map)
         L.control.layers(bases, null, { position: 'topright' }).addTo(map)
 
-        /* ---------- Hulpfuncties ---------- */
+        /* ---------- Helpers ---------- */
         const $ = (id) => document.getElementById(id)
         const round6 = (c) =>
           typeof c[0] === 'number'
@@ -519,7 +550,7 @@
           s
             .toLowerCase()
             .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[̀-ͯ]/g, '')
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-|-$/g, '')
 
@@ -555,14 +586,13 @@
           $('tab-draw').hidden = tab !== 'draw'
           $('tab-areas').hidden = tab !== 'areas'
           if (tab === 'draw') {
-            map.pm.addControls(drawControls)
+            showToolbar()
             if (map.hasLayer(areaLayer)) map.removeLayer(areaLayer)
           } else {
             map.pm.disableDraw()
             map.pm.disableGlobalEditMode()
             map.pm.disableGlobalDragMode()
             map.pm.disableGlobalRemovalMode()
-            map.pm.disableGlobalRotateMode()
             map.pm.removeControls()
             areaLayer.addTo(map)
             if (!areas.loadedOnce) loadLevel()
@@ -570,47 +600,126 @@
           updateExport()
         }
 
-        /* ---------- Zelf tekenen (Leaflet-Geoman) ---------- */
+        /* ---------- Draw your own (Leaflet-Geoman) ---------- */
         const drawnGroup = L.featureGroup().addTo(map)
-        const names = new Map() // leafletId -> naam
+        const names = new Map() // leafletId -> name
+        const types = new Map() // leafletId -> type label, survives undo
+        // Each entry is the full drawing after a change; undo steps back one entry.
+        const history = [[]]
+        const pathOptions = { color: '#e8620f', weight: 2.5, fillOpacity: 0.25 }
         const drawControls = {
           position: 'topleft',
-          drawCircle: false, // cirkels bestaan niet in GeoJSON
+          drawCircle: false, // circles don't exist in GeoJSON
           drawCircleMarker: false,
           drawText: false,
-          cutPolygon: false
+          cutPolygon: false,
+          rotateMode: false
         }
-        map.pm.setLang('nl')
-        map.pm.setGlobalOptions({
-          layerGroup: drawnGroup,
-          pathOptions: { color: '#e8620f', weight: 2.5, fillOpacity: 0.25 }
+
+        map.pm.setLang(
+          'custom',
+          {
+            buttonTitles: {
+              drawMarkerButton: 'Place a point',
+              drawPolyButton: 'Draw a shape',
+              drawLineButton: 'Draw a line',
+              drawRectButton: 'Draw a rectangle',
+              editButton: 'Edit points',
+              dragButton: 'Move shapes',
+              deleteButton: 'Delete shapes'
+            },
+            actions: {
+              finish: 'Finish', // also the button that ends edit, move and delete mode
+              cancel: 'Cancel',
+              removeLastVertex: 'Undo last point'
+            },
+            tooltips: {
+              finishLine:
+                'Click the last point to finish, or the first point to close the shape',
+              finishPoly: 'Click the first point to close the shape'
+            }
+          },
+          'en'
+        )
+        map.pm.setGlobalOptions({ layerGroup: drawnGroup, pathOptions })
+
+        map.pm.Toolbar.createCustomControl({
+          name: 'undo',
+          block: 'edit',
+          title: 'Undo (Ctrl+Z)',
+          className: 'leaflet-pm-icon-undo',
+          toggle: false,
+          disableOtherButtons: false, // keep the current drawing going so undo can take back a point
+          onClick: undo
         })
-        map.pm.addControls(drawControls)
+
+        // swap the slow native title for an instant hover label
+        function showToolbar() {
+          map.pm.addControls(drawControls)
+          document
+            .querySelectorAll('.leaflet-pm-toolbar .button-container[title]')
+            .forEach((el) => {
+              el.dataset.tip = el.title
+              el.querySelector('a')?.setAttribute('aria-label', el.title)
+              el.removeAttribute('title')
+            })
+          updateUndoButton()
+        }
+        showToolbar()
+
+        function typeLabel(layer) {
+          if (layer instanceof L.Marker) return 'Point'
+          if (layer instanceof L.Rectangle) return 'Rectangle'
+          if (layer instanceof L.Polygon) return 'Shape'
+          if (layer instanceof L.Polyline) return 'Line'
+          return 'Feature'
+        }
+
+        function track(layer, name = '') {
+          const id = L.stamp(layer)
+          names.set(id, name)
+          types.set(id, typeLabel(layer))
+          // also fires after a move, so this covers edit and drag
+          layer.on('pm:edit', () => {
+            refreshDrawn()
+            commit()
+          })
+        }
+
+        // remember where the pointer was, to tell a "close the shape" click apart
+        let lastPointer = null
+        map.on('mousemove', (e) => {
+          lastPointer = e.containerPoint
+        })
 
         map.on('pm:create', (e) => {
-          names.set(L.stamp(e.layer), '')
-          e.layer.on('pm:edit pm:dragend pm:rotateend', refreshDrawn)
+          let layer = e.layer
+          // Geoman finishes a line when you click its first point but drops that
+          // last segment. Treat it as closing the shape instead.
+          if (e.shape === 'Line') {
+            const pts = layer.getLatLngs()
+            const first = pts.length >= 3 && map.latLngToContainerPoint(pts[0])
+            if (first && lastPointer && first.distanceTo(lastPointer) < 12) {
+              drawnGroup.removeLayer(layer)
+              layer = L.polygon(pts, pathOptions).addTo(drawnGroup)
+            }
+          }
+          track(layer)
           refreshDrawn()
+          commit()
         })
         map.on('pm:remove', (e) => {
           drawnGroup.removeLayer(e.layer)
           names.delete(L.stamp(e.layer))
           refreshDrawn()
+          commit()
         })
-
-        function typeLabel(layer) {
-          if (layer instanceof L.Marker) return 'Punt'
-          if (layer instanceof L.Rectangle) return 'Rechthoek'
-          if (layer instanceof L.Polygon) return 'Vlak'
-          if (layer instanceof L.Polyline) return 'Lijn'
-          return 'Object'
-        }
 
         function drawnFeatures() {
           return drawnGroup.getLayers().map((layer) => {
             const f = layer.toGeoJSON()
-            const naam = names.get(L.stamp(layer))
-            f.properties = naam ? { naam } : {}
+            const name = names.get(L.stamp(layer))
+            f.properties = name ? { name } : {}
             return f
           })
         }
@@ -625,16 +734,19 @@
             const id = L.stamp(layer)
             const li = document.createElement('li')
             li.className = 'drawn-item'
-            li.innerHTML = `<span class="type">${typeLabel(layer)}</span>`
+            li.innerHTML = `<span class="type">${
+              types.get(id) || typeLabel(layer)
+            }</span>`
             const input = document.createElement('input')
             input.type = 'text'
-            input.placeholder = `Naam (optioneel)`
+            input.placeholder = 'Name (optional)'
             input.value = names.get(id) || ''
-            input.setAttribute('aria-label', `Naam voor object ${i + 1}`)
+            input.setAttribute('aria-label', `Name for feature ${i + 1}`)
             input.addEventListener('input', () => {
               names.set(id, input.value.trim())
               updateExport()
             })
+            input.addEventListener('change', commit)
             const zoom = document.createElement('button')
             zoom.className = 'icon-btn'
             zoom.textContent = 'Zoom'
@@ -645,11 +757,12 @@
             })
             const del = document.createElement('button')
             del.className = 'icon-btn'
-            del.textContent = 'Verwijder'
+            del.textContent = 'Delete'
             del.addEventListener('click', () => {
               drawnGroup.removeLayer(layer)
               names.delete(id)
               refreshDrawn()
+              commit()
             })
             li.append(input, zoom, del)
             list.append(li)
@@ -661,18 +774,117 @@
           drawnGroup.clearLayers()
           names.clear()
           refreshDrawn()
+          commit()
         })
 
-        /* ---------- Gebieden kiezen (CBS gebiedsindelingen via PDOK OGC API) ---------- */
+        /* ---------- Undo ---------- */
+        function snapshot() {
+          return drawnGroup.getLayers().map((layer) => {
+            const id = L.stamp(layer)
+            const latlngs = layer.getLatLng
+              ? layer.getLatLng()
+              : JSON.parse(JSON.stringify(layer.getLatLngs()))
+            return {
+              type: types.get(id) || typeLabel(layer),
+              latlngs,
+              name: names.get(id) || ''
+            }
+          })
+        }
+
+        function commit() {
+          history.push(snapshot())
+          if (history.length > 100) history.shift()
+          updateUndoButton()
+        }
+
+        function restore(state) {
+          drawnGroup.clearLayers()
+          names.clear()
+          state.forEach(({ type, latlngs, name }) => {
+            const layer =
+              type === 'Point'
+                ? L.marker(latlngs)
+                : type === 'Rectangle'
+                ? L.rectangle(
+                    L.latLngBounds(latlngs.flat(Infinity)),
+                    pathOptions
+                  )
+                : type === 'Line'
+                ? L.polyline(latlngs, pathOptions)
+                : L.polygon(latlngs, pathOptions)
+            layer.addTo(drawnGroup)
+            track(layer, name)
+          })
+          refreshDrawn()
+        }
+
+        function drawingShape() {
+          const shape =
+            map.pm.Draw.getActiveShape && map.pm.Draw.getActiveShape()
+          return shape && map.pm.Draw[shape]
+        }
+
+        function undo() {
+          // while drawing a line or shape, take back the last point first
+          const drawing = drawingShape()
+          if (
+            drawing &&
+            drawing._removeLastVertex &&
+            drawing._layer?.getLatLngs?.().length > 0
+          ) {
+            drawing._removeLastVertex()
+            return
+          }
+          if (history.length < 2) return
+          map.pm.disableGlobalEditMode()
+          map.pm.disableGlobalDragMode()
+          map.pm.disableGlobalRemovalMode()
+          history.pop()
+          restore(history[history.length - 1])
+          updateUndoButton()
+        }
+
+        function updateUndoButton() {
+          const btn = document.querySelector('.leaflet-pm-icon-undo')
+          if (btn)
+            btn
+              .closest('.button-container')
+              .classList.toggle('pm-disabled', history.length < 2)
+        }
+
+        document.addEventListener('keydown', (e) => {
+          if (activeTab !== 'draw') return
+          if (e.target.closest('input, textarea, select')) return
+          if (
+            (e.ctrlKey || e.metaKey) &&
+            !e.shiftKey &&
+            e.key.toLowerCase() === 'z'
+          ) {
+            e.preventDefault()
+            undo()
+          } else if (e.key === 'Escape') {
+            map.pm.disableDraw()
+          }
+        })
+
+        /* ---------- Pick areas (CBS boundaries via PDOK OGC API) ---------- */
         const API =
           'https://api.pdok.nl/cbs/gebiedsindelingen/ogc/v1/collections/'
         const LEVELS = {
-          provincie: { col: 'provincie_gegeneraliseerd', plural: 'provincies' },
-          gemeente: { col: 'gemeente_gegeneraliseerd', plural: 'gemeenten' },
-          wijk: { col: 'wijk_gegeneraliseerd', plural: 'wijken', prefix: 'WK' },
+          provincie: { col: 'provincie_gegeneraliseerd', plural: 'provinces' },
+          gemeente: {
+            col: 'gemeente_gegeneraliseerd',
+            plural: 'municipalities'
+          },
+          wijk: {
+            col: 'wijk_gegeneraliseerd',
+            plural: 'districts',
+            prefix: 'WK'
+          },
           buurt: {
             col: 'buurt_gegeneraliseerd',
-            plural: 'buurten',
+            plural: 'neighbourhoods',
             prefix: 'BU'
           }
         }
@@ -723,7 +935,7 @@
               headers: { Accept: 'application/geo+json' }
             })
             if (!res.ok)
-              throw new Error(`PDOK antwoordde met status ${res.status}`)
+              throw new Error(`PDOK responded with status ${res.status}`)
             const json = await res.json()
             out.push(...(json.features || []))
             const link = (json.links || []).find((l) => l.rel === 'next')
@@ -733,7 +945,7 @@
           return out
         }
 
-        // Haalt een collectie op voor een jaar; valt terug op het jaar ervoor als er (nog) geen data is.
+        // Fetches a collection for a year; falls back to the year before if there is no data (yet).
         async function getCollection(col, year, bbox) {
           for (const y of [year, year - 1]) {
             const key = `${col}|${y}|${bbox ? bbox.join(',') : ''}`
@@ -759,18 +971,14 @@
           const year = Number($('year').value)
           const def = LEVELS[level]
           $('gm-wrap').hidden = !def.prefix
-          $(
-            'gm-load'
-          ).textContent = `${def.plural[0].toUpperCase()}${def.plural.slice(
-            1
-          )} laden`
+          $('gm-load').textContent = `Load ${def.plural}`
           areas.selected.clear()
 
-          // Gemeentelijst voor de keuze bij wijken/buurten
+          // Municipality list to choose from for districts/neighbourhoods
           if (def.prefix) {
             showFeatures([], '')
             const req = ++areas.requestId
-            setStatus('Gemeentelijst laden…')
+            setStatus('Loading municipalities…')
             try {
               const { feats } = await getCollection(LEVELS.gemeente.col, year)
               if (req !== areas.requestId) return
@@ -780,34 +988,30 @@
                 .map((f) => f.properties.statnaam)
                 .sort((a, b) => a.localeCompare(b, 'nl'))
                 .forEach((n) => dl.append(new Option(n)))
-              setStatus(`Kies een gemeente om de ${def.plural} te laden.`)
+              setStatus(`Choose a municipality to load its ${def.plural}.`)
             } catch (err) {
-              setStatus(`Laden mislukt: ${err.message}`, true)
+              setStatus(`Loading failed: ${err.message}`, true)
             }
             updateExport()
             return
           }
 
           const req = ++areas.requestId
-          setStatus(
-            `${def.plural[0].toUpperCase()}${def.plural.slice(
-              1
-            )} ${year} laden…`
-          )
+          setStatus(`Loading ${def.plural} ${year}…`)
           try {
             const { feats, year: used } = await getCollection(def.col, year)
             if (req !== areas.requestId) return
             areas.usedYear = used
-            showFeatures(feats, `${level}-${used}`)
+            showFeatures(feats, `${def.plural}-${used}`)
             const note =
               used !== year
-                ? ` (${year} is nog niet beschikbaar, ${used} gebruikt)`
+                ? ` (${year} isn't available yet, using ${used})`
                 : ''
             setStatus(
-              `${feats.length} ${def.plural} geladen${note}. Klik op de kaart of in de lijst om te selecteren.`
+              `${feats.length} ${def.plural} loaded${note}. Click on the map or in the list to select.`
             )
           } catch (err) {
-            setStatus(`Laden mislukt: ${err.message}`, true)
+            setStatus(`Loading failed: ${err.message}`, true)
           }
         }
 
@@ -817,7 +1021,7 @@
           const year = Number($('year').value)
           const name = $('gm-input').value.trim().toLowerCase()
           if (!name) {
-            setStatus('Typ eerst een gemeentenaam.', true)
+            setStatus('Type a municipality name first.', true)
             return
           }
           const req = ++areas.requestId
@@ -831,18 +1035,14 @@
             )
             if (!gm) {
               setStatus(
-                `Gemeente "${
+                `Municipality "${
                   $('gm-input').value
-                }" niet gevonden. Kies een naam uit de lijst.`,
+                }" not found. Pick a name from the list.`,
                 true
               )
               return
             }
-            setStatus(
-              `${def.plural[0].toUpperCase()}${def.plural.slice(1)} in ${
-                gm.properties.statnaam
-              } laden…`
-            )
+            setStatus(`Loading ${def.plural} in ${gm.properties.statnaam}…`)
             const code = gm.properties.statcode.replace(/^GM/, '')
             const { feats, year: used } = await getCollection(
               def.col,
@@ -862,11 +1062,11 @@
             setStatus(
               inside.length
                 ? `${inside.length} ${def.plural} in ${gm.properties.statnaam} (${used}).`
-                : `Geen ${def.plural} gevonden voor ${gm.properties.statnaam} in ${used}.`,
+                : `No ${def.plural} found for ${gm.properties.statnaam} in ${used}.`,
               !inside.length
             )
           } catch (err) {
-            setStatus(`Laden mislukt: ${err.message}`, true)
+            setStatus(`Loading failed: ${err.message}`, true)
           }
         }
 
@@ -966,7 +1166,7 @@
         /* ---------- Export ---------- */
         function currentExport() {
           if (activeTab === 'draw') {
-            return { data: fc(drawnFeatures()), filename: 'getekend.geojson' }
+            return { data: fc(drawnFeatures()), filename: 'drawn.geojson' }
           }
           const chosen = areas.features.filter((f) =>
             areas.selected.has(f.properties.statcode)
@@ -976,7 +1176,7 @@
               ? `${slug(chosen[0].properties.statnaam)}-${
                   areas.usedYear
                 }.geojson`
-              : `${areas.label || 'selectie'}.geojson`
+              : `${areas.label || 'selection'}.geojson`
           return { data: fc(chosen), filename }
         }
 
@@ -984,13 +1184,13 @@
           const { data } = currentExport()
           const n = data.features.length
           $('export-count').textContent = `${n} ${
-            n === 1 ? 'object' : 'objecten'
+            n === 1 ? 'feature' : 'features'
           }`
           const text = JSON.stringify(data)
           $('preview').value =
             text.length > 20000
               ? text.slice(0, 20000) +
-                ' … (ingekort in voorbeeld; download bevat alles)'
+                ' … (shortened in preview; the download has everything)'
               : text
           $('download').disabled = n === 0
           $('copy').disabled = n === 0
@@ -1025,9 +1225,9 @@
             document.execCommand('copy')
             ta.remove()
           }
-          btn.textContent = 'Gekopieerd'
+          btn.textContent = 'Copied'
           setTimeout(() => {
-            btn.textContent = 'Kopieer'
+            btn.textContent = 'Copy'
           }, 1500)
         })
 
