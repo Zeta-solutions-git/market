@@ -12,23 +12,24 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@geoman-io/leaflet-geoman-free@2.20.2/dist/leaflet-geoman.css"
     />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
     <style>
+      /* Colours and type follow the marketplace so the viewer feels part of the asset page */
       :root {
-        --ink: #15232e;
-        --ink-soft: #4b5b67;
-        --line: #d5dde2;
-        --surface: #f5f7f8;
+        --ink: #092861;
+        --text: #2b3a55;
+        --muted: #52607a;
+        --line: #e3e8f0;
+        --line-soft: #eef0f4;
+        --surface: #f5f7fb;
         --panel: #ffffff;
-        --polder: #1d4f73;
-        --oranje: #e8620f;
-        --oranje-dark: #a94300;
-        --focus: #1d4f73;
+        --accent: #316aea;
+        --accent-dark: #1f4fc4;
+        --accent-soft: #e8efff;
+        --danger: #b42318;
+        --shape: #316aea;
+        --radius: 8px;
+        --shadow: 0 1px 2px rgba(9, 40, 97, 0.08),
+          0 4px 12px rgba(9, 40, 97, 0.1);
       }
       * {
         box-sizing: border-box;
@@ -39,276 +40,193 @@
         margin: 0;
       }
       body {
-        font-family: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
-        color: var(--ink);
+        font-family: Helvetica, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          Roboto, Arial, sans-serif;
+        color: var(--text);
         background: var(--surface);
         display: grid;
-        grid-template-columns: 380px 1fr;
+        grid-template-columns: minmax(0, 1fr) 320px;
         height: 100dvh;
-        font-size: 15px;
+        font-size: 14px;
         line-height: 1.45;
       }
-      #map {
-        height: 100%;
-        background: #e6ecef;
-      }
-
-      #panel {
-        background: var(--panel);
-        border-right: 1px solid var(--line);
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-      }
-      .scroll {
-        overflow-y: auto;
-        flex: 1;
-        min-height: 0;
-        padding: 0 20px 16px;
-      }
-      header {
-        padding: 20px 20px 12px;
-      }
-      h1 {
-        font-size: 22px;
-        font-weight: 700;
-        margin: 0 0 4px;
-        letter-spacing: -0.01em;
-      }
-      header p {
-        margin: 0;
-        color: var(--ink-soft);
-      }
-
-      .tabs {
-        display: flex;
-        gap: 4px;
-        padding: 0 20px;
-        border-bottom: 1px solid var(--line);
-      }
-      .tabs button {
-        font: inherit;
-        font-weight: 600;
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 10px 12px;
-        color: var(--ink-soft);
-        border-bottom: 3px solid transparent;
-        margin-bottom: -1px;
-      }
-      .tabs button[aria-selected='true'] {
-        color: var(--ink);
-        border-bottom-color: var(--oranje);
-      }
-
-      .tabpanel {
-        padding-top: 16px;
-      }
-      .hint {
-        color: var(--ink-soft);
-        margin: 0 0 14px;
-      }
-
-      label {
-        display: block;
-        font-weight: 600;
-        font-size: 13px;
-        margin-bottom: 12px;
-      }
+      button,
+      input,
       select,
-      input[type='text'],
-      input[type='search'] {
-        display: block;
-        width: 100%;
-        margin-top: 4px;
+      textarea {
         font: inherit;
-        font-weight: 400;
-        padding: 8px 10px;
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        background: #fff;
-        color: var(--ink);
-      }
-      .row {
-        display: flex;
-        gap: 10px;
-      }
-      .row > * {
-        flex: 1;
-      }
-
-      button.btn {
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-        padding: 8px 12px;
-        border-radius: 6px;
-        border: 1px solid var(--line);
-        background: #fff;
-        color: var(--ink);
-      }
-      button.btn:hover {
-        background: var(--surface);
-      }
-      button.btn.primary {
-        background: var(--oranje);
-        border-color: var(--oranje);
-        color: #fff;
-      }
-      button.btn.primary:hover {
-        background: var(--oranje-dark);
-        border-color: var(--oranje-dark);
-      }
-      button.btn:disabled {
-        opacity: 0.45;
-        cursor: not-allowed;
-      }
-      .btn.small {
-        padding: 5px 10px;
-        font-size: 13px;
+        color: inherit;
       }
       :focus-visible {
-        outline: 2px solid var(--focus);
+        outline: 2px solid var(--accent);
         outline-offset: 2px;
       }
-
-      .status {
-        font-size: 13px;
-        color: var(--ink-soft);
-        min-height: 1.4em;
-        margin: 4px 0 10px;
-      }
-      .status.error {
-        color: #b42318;
+      [hidden] {
+        display: none !important;
       }
 
-      ul.list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        border-top: 1px solid var(--line);
+      /* ---------- Map stage ---------- */
+      .stage {
+        position: relative;
+        min-width: 0;
+        min-height: 0;
       }
-      ul.list li {
-        border-bottom: 1px solid var(--line);
+      #map {
+        position: absolute;
+        inset: 0;
+        background: #e6ecef;
       }
-      .area-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        width: 100%;
-        padding: 7px 4px;
-        background: none;
-        border: none;
-        font: inherit;
-        text-align: left;
-        cursor: pointer;
-        color: var(--ink);
-      }
-      .area-item:hover {
-        background: var(--surface);
-      }
-      .box {
-        width: 16px;
-        height: 16px;
-        border: 1.5px solid #8a99a4;
-        border-radius: 3px;
-        flex: none;
-        display: grid;
-        place-items: center;
-      }
-      .area-item[aria-checked='true'] .box {
-        background: var(--oranje);
-        border-color: var(--oranje);
-      }
-      .area-item[aria-checked='true'] .box::after {
-        content: '';
-        width: 8px;
-        height: 4px;
-        border: 2px solid #fff;
-        border-top: 0;
-        border-right: 0;
-        transform: rotate(-45deg) translate(1px, -1px);
-      }
-      .area-item .code {
-        margin-left: auto;
-        color: var(--ink-soft);
-        font-size: 12px;
-      }
-
-      .drawn-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 0;
-      }
-      .drawn-item .type {
-        font-size: 12px;
-        color: var(--ink-soft);
-        width: 62px;
-        flex: none;
-      }
-      .drawn-item input {
-        margin: 0;
-        padding: 5px 8px;
-      }
-      .icon-btn {
-        background: none;
-        border: 1px solid transparent;
-        border-radius: 5px;
-        cursor: pointer;
-        padding: 4px 6px;
-        font: inherit;
-        font-size: 13px;
-        color: var(--ink-soft);
-      }
-      .icon-btn:hover {
-        border-color: var(--line);
-        color: var(--ink);
-      }
-      .empty {
-        color: var(--ink-soft);
-        font-style: italic;
-      }
-
-      .export {
-        border-top: 1px solid var(--line);
-        padding: 14px 20px 18px;
-        background: var(--panel);
-      }
-      .export-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        margin-bottom: 8px;
-      }
-      .export-head span {
-        font-size: 12px;
-        color: var(--ink-soft);
-      }
-      textarea {
-        width: 100%;
-        height: 110px;
-        resize: vertical;
-        font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-        font-size: 11.5px;
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        padding: 8px;
-        color: var(--ink-soft);
-        background: var(--surface);
-        margin-bottom: 10px;
-      }
-
       .leaflet-container {
         font-family: inherit;
       }
       .leaflet-tooltip {
         font-family: inherit;
         font-weight: 600;
+        color: var(--ink);
       }
 
-      /* Toolbar labels show straight away on hover (native titles are slow and easy to miss) */
+      .overlay {
+        position: absolute;
+        z-index: 1000;
+      }
+
+      .seg {
+        display: inline-flex;
+        padding: 3px;
+        gap: 2px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+      .seg button {
+        border: 0;
+        background: none;
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: 7px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .seg button:hover {
+        color: var(--ink);
+      }
+      .seg button[aria-pressed='true'],
+      .seg button[aria-selected='true'] {
+        background: #fff;
+        color: var(--ink);
+        box-shadow: 0 1px 2px rgba(9, 40, 97, 0.15);
+      }
+      .basemap {
+        top: 12px;
+        right: 12px;
+        background: #fff;
+        box-shadow: var(--shadow);
+        border-color: transparent;
+      }
+
+      .hint-bar {
+        left: 50%;
+        bottom: 28px;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        max-width: calc(100% - 140px);
+        width: max-content;
+        padding: 8px 8px 8px 14px;
+        background: var(--ink);
+        color: #fff;
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        font-size: 13px;
+      }
+      .hint-bar.no-actions {
+        padding-right: 14px;
+      }
+      .hint-actions {
+        display: flex;
+        gap: 6px;
+        flex: none;
+      }
+      .hint-actions button {
+        border: 0;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+      }
+      .hint-actions button:hover {
+        background: rgba(255, 255, 255, 0.24);
+      }
+      .hint-actions button.primary {
+        background: #fff;
+        color: var(--ink);
+      }
+      .hint-actions button.primary:hover {
+        background: var(--accent-soft);
+      }
+      .hint-actions button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+
+      /* Leaflet + Geoman controls, restyled */
+      .leaflet-touch .leaflet-bar,
+      .leaflet-bar {
+        border: 0;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .leaflet-bar a,
+      .leaflet-touch .leaflet-bar a {
+        width: 34px;
+        height: 34px;
+        line-height: 34px;
+        color: var(--ink);
+        border-bottom-color: var(--line-soft);
+      }
+      .leaflet-bar a:hover {
+        background: var(--surface);
+      }
+      .leaflet-top.leaflet-left {
+        top: 2px;
+        left: 2px;
+      }
+      .leaflet-pm-toolbar {
+        margin-bottom: 0;
+      }
+      .leaflet-pm-toolbar .button-container a.leaflet-buttons-control-button {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        display: grid;
+        place-items: center;
+      }
+      .leaflet-pm-toolbar .control-icon {
+        width: 34px;
+        height: 34px;
+        background-size: 18px;
+        opacity: 0.8;
+      }
+      .leaflet-pm-toolbar
+        .button-container.active
+        a.leaflet-buttons-control-button {
+        background: var(--accent-soft);
+        box-shadow: inset 3px 0 0 var(--accent);
+      }
+      .leaflet-pm-toolbar .button-container.active .control-icon {
+        opacity: 1;
+      }
+      .leaflet-pm-toolbar .leaflet-pm-actions-container {
+        display: none !important;
+      } /* the hint bar holds these actions */
+      .leaflet-pm-toolbar .button-container.pm-disabled {
+        opacity: 0.4;
+      }
       .leaflet-pm-toolbar .button-container[data-tip] {
         position: relative;
       }
@@ -329,208 +247,697 @@
         pointer-events: none;
         z-index: 1000;
       }
-      /* while a tool's own action buttons are open they sit in the same spot */
-      .leaflet-pm-toolbar .button-container.active:hover::after {
-        display: none;
-      }
-      .leaflet-pm-toolbar .button-container.pm-disabled {
-        opacity: 0.4;
-      }
       .leaflet-pm-toolbar .leaflet-pm-icon-undo {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 14 4 9l5-5'/%3E%3Cpath d='M4 9h10.5a5.5 5.5 0 0 1 0 11H11'/%3E%3C/svg%3E");
-        background-size: 18px;
+      }
+      .leaflet-control-attribution {
+        font-size: 10px;
+      }
+
+      /* ---------- Side panel ---------- */
+      #panel {
+        background: var(--panel);
+        border-left: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .panel-top {
+        padding: 14px 16px 12px;
+      }
+      .panel-top .seg {
+        display: flex;
+      }
+      .panel-top .seg button {
+        flex: 1;
+      }
+      .scroll {
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
+        padding: 4px 16px 16px;
+      }
+
+      .list-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 6px 0 8px;
+      }
+      .list-head h2 {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .link {
+        border: 0;
+        background: none;
+        padding: 0;
+        cursor: pointer;
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .link:hover {
+        text-decoration: underline;
+      }
+      .link:disabled {
+        color: var(--muted);
+        opacity: 0.6;
+        cursor: default;
+        text-decoration: none;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 28px 12px;
+        color: var(--muted);
+      }
+      .empty-state svg {
+        width: 40px;
+        height: 40px;
+        color: #b7c3d9;
+        margin-bottom: 8px;
+      }
+      .empty-state strong {
+        display: block;
+        color: var(--ink);
+        margin-bottom: 4px;
+        font-size: 14px;
+      }
+      .empty-state p {
+        margin: 0;
+        font-size: 13px;
+      }
+
+      ul.list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .shape {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 6px 8px 10px;
+        margin-bottom: 6px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+        transition: border-color 0.12s, background-color 0.12s;
+      }
+      .shape:hover,
+      .shape:focus-within {
+        border-color: #c5d3ee;
+        background: #fafcff;
+      }
+      .shape-icon {
+        width: 18px;
+        height: 18px;
+        flex: none;
+        color: var(--shape);
+      }
+      .shape-main {
+        flex: 1;
+        min-width: 0;
+      }
+      .shape-main input[type='text'] {
+        display: block;
+        height: auto;
+        width: 100%;
+        border: 1px solid transparent;
+        box-shadow: none;
+        border-radius: 5px;
+        padding: 2px 6px;
+        margin-left: -6px;
+        font-weight: 600;
+        color: var(--ink);
+        background: transparent;
+      }
+      .shape-main input[type='text']::placeholder {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .shape-main input[type='text']:hover {
+        border-color: var(--line);
+      }
+      .shape-main input[type='text']:focus {
+        border-color: var(--accent);
+        background: #fff;
+        outline: none;
+        box-shadow: none;
+      }
+      .shape-meta {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .icon-btn {
+        flex: none;
+        width: 30px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 6px;
+        background: none;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .icon-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+      .icon-btn:hover {
+        background: var(--surface);
+        color: var(--ink);
+      }
+      .icon-btn.danger:hover {
+        background: #fdecea;
+        color: var(--danger);
+      }
+
+      /* Pick areas */
+      .field {
+        display: block;
+        margin-bottom: 12px;
+      }
+      .field > span,
+      .field-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .fields {
+        display: grid;
+        grid-template-columns: 1fr 88px;
+        gap: 8px;
+      }
+      select,
+      input[type='text'],
+      input[type='search'] {
+        display: block;
+        width: 100%;
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+        color: var(--ink);
+      }
+      select:focus,
+      input[type='text']:focus,
+      input[type='search']:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+      .inline {
+        display: flex;
+        gap: 6px;
+      }
+      .search {
+        position: relative;
+      }
+      .search svg {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 15px;
+        height: 15px;
+        color: var(--muted);
+        pointer-events: none;
+      }
+      .search input {
+        padding-left: 32px;
+      }
+
+      .btn {
+        cursor: pointer;
+        height: 36px;
+        padding: 0 14px;
+        border-radius: var(--radius);
+        font-weight: 600;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      .btn:hover {
+        background: var(--surface);
+      }
+      .btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .btn.primary:hover {
+        background: var(--accent-dark);
+        border-color: var(--accent-dark);
+      }
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .btn.icon {
+        width: 36px;
+        padding: 0;
+        display: grid;
+        place-items: center;
+      }
+      .btn.icon svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      .status {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 0;
+      }
+      .status.error {
+        color: var(--danger);
+      }
+      .status.loading::before {
+        content: '';
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 6px;
+        vertical-align: -1px;
+        border: 2px solid var(--line);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .area-list {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      .area-list li + li {
+        border-top: 1px solid var(--line-soft);
+      }
+      .area-list:empty {
+        display: none;
+      }
+      .area-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 8px 10px;
+        background: none;
+        border: none;
+        text-align: left;
+        cursor: pointer;
+        color: var(--ink);
+      }
+      .area-item:hover {
+        background: var(--surface);
+      }
+      .area-item[aria-checked='true'] {
+        background: var(--accent-soft);
+      }
+      .box {
+        width: 16px;
+        height: 16px;
+        border: 1.5px solid #9aa8bf;
+        border-radius: 4px;
+        flex: none;
+        display: grid;
+        place-items: center;
+        background: #fff;
+      }
+      .area-item[aria-checked='true'] .box {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .area-item[aria-checked='true'] .box::after {
+        content: '';
+        width: 8px;
+        height: 4px;
+        border: 2px solid #fff;
+        border-top: 0;
+        border-right: 0;
+        transform: rotate(-45deg) translate(1px, -1px);
+      }
+      .area-item .code {
+        margin-left: auto;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      /* Export footer */
+      .export {
+        border-top: 1px solid var(--line);
+        padding: 12px 16px 14px;
+        background: var(--panel);
+      }
+      .export-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 10px;
+      }
+      .export-summary strong {
+        color: var(--ink);
+        font-size: 13px;
+      }
+      .export-summary span {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .export-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .export-actions .primary {
+        flex: 1;
+      }
+      details {
+        margin-top: 10px;
+      }
+      summary {
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        list-style: none;
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      summary::before {
+        content: '▸ ';
+      }
+      details[open] summary::before {
+        content: '▾ ';
+      }
+      textarea {
+        display: block;
+        width: 100%;
+        height: 96px;
+        margin-top: 8px;
+        resize: vertical;
+        font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 11px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 8px;
+        color: var(--muted);
+        background: var(--surface);
       }
 
       @media (max-width: 760px) {
         body {
           grid-template-columns: 1fr;
-          grid-template-rows: 50dvh 1fr;
-        }
-        #map {
-          grid-row: 1;
+          grid-template-rows: 55dvh minmax(0, 1fr);
         }
         #panel {
-          grid-row: 2;
-          border-right: none;
+          border-left: 0;
           border-top: 1px solid var(--line);
         }
-        header {
-          padding-top: 14px;
+        .hint-bar {
+          max-width: calc(100% - 24px);
+          bottom: 24px;
+          flex-wrap: wrap;
         }
-        h1 {
-          font-size: 19px;
-        }
-        textarea {
-          height: 70px;
+        .basemap {
+          top: 10px;
+          right: 10px;
         }
       }
       @media (prefers-reduced-motion: reduce) {
         * {
-          scroll-behavior: auto !important;
+          animation: none !important;
+          transition: none !important;
         }
       }
     </style>
   </head>
   <body>
-    <aside id="panel">
-      <header>
-        <h1>Netherlands in GeoJSON</h1>
-        <p>
-          Draw your own area or pick provinces, municipalities, districts and
-          neighbourhoods, and export them as GeoJSON.
-        </p>
-      </header>
+    <div class="stage">
+      <div id="map" aria-label="Map of the Netherlands"></div>
 
-      <div class="tabs" role="tablist">
-        <button
-          role="tab"
-          id="tabbtn-draw"
-          aria-selected="true"
-          aria-controls="tab-draw"
-          data-tab="draw"
-        >
-          Draw
-        </button>
-        <button
-          role="tab"
-          id="tabbtn-areas"
-          aria-selected="false"
-          aria-controls="tab-areas"
-          data-tab="areas"
-        >
-          Pick areas
+      <div class="overlay seg basemap" role="group" aria-label="Background map">
+        <button type="button" data-base="map" aria-pressed="true">Map</button>
+        <button type="button" data-base="aerial" aria-pressed="false">
+          Aerial
         </button>
       </div>
 
+      <div id="hint" class="overlay hint-bar" role="status" hidden>
+        <span id="hint-text"></span>
+        <span id="hint-actions" class="hint-actions"></span>
+      </div>
+    </div>
+
+    <aside id="panel">
+      <div class="panel-top">
+        <div class="seg" role="tablist" aria-label="Mode">
+          <button
+            role="tab"
+            id="tabbtn-draw"
+            aria-selected="true"
+            aria-controls="tab-draw"
+            data-tab="draw"
+          >
+            Draw
+          </button>
+          <button
+            role="tab"
+            id="tabbtn-areas"
+            aria-selected="false"
+            aria-controls="tab-areas"
+            data-tab="areas"
+          >
+            Pick areas
+          </button>
+        </div>
+      </div>
+
       <div class="scroll">
-        <section
-          id="tab-draw"
-          class="tabpanel"
-          role="tabpanel"
-          aria-labelledby="tabbtn-draw"
-        >
-          <p class="hint">
-            Pick a tool in the toolbar on the left of the map. To close a shape,
-            click its first point again. You can name each shape; the name goes
-            into its properties.
-          </p>
+        <section id="tab-draw" role="tabpanel" aria-labelledby="tabbtn-draw">
+          <div id="drawn-empty" class="empty-state">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M4 18 9 5l6 9 5-4" />
+              <circle cx="4" cy="18" r="1.6" />
+              <circle cx="9" cy="5" r="1.6" />
+              <circle cx="15" cy="14" r="1.6" />
+              <circle cx="20" cy="10" r="1.6" />
+            </svg>
+            <strong>No shapes yet</strong>
+            <p>
+              Pick a tool on the left of the map to draw a rectangle, shape,
+              line or point.
+            </p>
+          </div>
+          <div id="drawn-head" class="list-head" hidden>
+            <h2 id="drawn-title">Your shapes</h2>
+            <button id="clear-drawn" type="button" class="link">
+              Clear all
+            </button>
+          </div>
           <ul id="drawn-list" class="list"></ul>
-          <p id="drawn-empty" class="empty">Nothing drawn yet.</p>
-          <button id="clear-drawn" class="btn small" hidden>Clear all</button>
         </section>
 
         <section
           id="tab-areas"
-          class="tabpanel"
           role="tabpanel"
           aria-labelledby="tabbtn-areas"
           hidden
         >
-          <div class="row">
-            <label
-              >Level
+          <div class="fields">
+            <label class="field"
+              ><span>Level</span>
               <select id="level">
                 <option value="provincie">Provinces</option>
                 <option value="gemeente" selected>Municipalities</option>
-                <option value="wijk">Districts in a municipality</option>
-                <option value="buurt">Neighbourhoods in a municipality</option>
+                <option value="wijk">Districts</option>
+                <option value="buurt">Neighbourhoods</option>
               </select>
             </label>
-            <label
-              >Year
+            <label class="field"
+              ><span>Year</span>
               <select id="year"></select>
             </label>
           </div>
 
-          <div id="gm-wrap" hidden>
-            <label
-              >Municipality
+          <div id="gm-wrap" class="field" hidden>
+            <label for="gm-input" class="field-label">In municipality</label>
+            <div class="inline">
               <input
                 id="gm-input"
                 type="text"
                 list="gm-list"
-                placeholder="Type a municipality name"
+                placeholder="e.g. Utrecht"
                 autocomplete="off"
               />
-              <datalist id="gm-list"></datalist>
-            </label>
-            <button id="gm-load" class="btn" style="margin-bottom: 12px">
-              Load districts
-            </button>
+              <button id="gm-load" type="button" class="btn">Load</button>
+            </div>
+            <datalist id="gm-list"></datalist>
           </div>
 
-          <label
-            >Filter by name
-            <input id="filter" type="search" placeholder="e.g. Amsterdam" />
+          <label class="field search">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-4-4" />
+            </svg>
+            <input
+              id="filter"
+              type="search"
+              placeholder="Search by name"
+              aria-label="Search by name"
+            />
           </label>
 
-          <div class="row" style="margin-bottom: 6px">
-            <button id="sel-all" class="btn small">Select visible</button>
-            <button id="sel-none" class="btn small">Clear selection</button>
+          <div class="list-head">
+            <p id="status" class="status" role="status"></p>
+            <span>
+              <button id="sel-all" type="button" class="link">
+                Select shown
+              </button>
+              <span style="color: var(--line)"> · </span>
+              <button id="sel-none" type="button" class="link">Clear</button>
+            </span>
           </div>
-          <p id="status" class="status" role="status"></p>
-          <ul id="area-list" class="list"></ul>
+          <ul id="area-list" class="list area-list"></ul>
         </section>
       </div>
 
       <footer class="export">
-        <div class="export-head">
-          <strong id="export-count">0 features</strong>
-          <span>WGS84, 6 decimals</span>
+        <div class="export-summary">
+          <strong id="export-count">Nothing to export yet</strong>
+          <span>GeoJSON · WGS84</span>
         </div>
-        <textarea
-          id="preview"
-          readonly
-          spellcheck="false"
-          aria-label="GeoJSON preview"
-        ></textarea>
-        <div class="row">
-          <button id="download" class="btn primary">Download .geojson</button>
-          <button id="copy" class="btn">Copy</button>
+        <div class="export-actions">
+          <button id="copy" type="button" class="btn primary">
+            Copy GeoJSON
+          </button>
+          <button
+            id="download"
+            type="button"
+            class="btn icon"
+            title="Download .geojson"
+            aria-label="Download .geojson"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 4v11" />
+              <path d="m7 10 5 5 5-5" />
+              <path d="M5 20h14" />
+            </svg>
+          </button>
         </div>
+        <details>
+          <summary>Show GeoJSON</summary>
+          <textarea
+            id="preview"
+            readonly
+            spellcheck="false"
+            aria-label="GeoJSON preview"
+          ></textarea>
+        </details>
       </footer>
     </aside>
-
-    <main id="map" aria-label="Map of the Netherlands"></main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@geoman-io/leaflet-geoman-free@2.20.2/dist/leaflet-geoman.min.js"></script>
     <script>
       ;(() => {
-        /* ---------- Map and base layers (PDOK, no API key needed) ---------- */
-        const map = L.map('map', { zoomControl: true }).setView([52.2, 5.35], 8)
+        const $ = (id) => document.getElementById(id)
+        const ICONS = {
+          Point:
+            '<path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/>',
+          Line: '<path d="M4 18 10 8l5 7 5-9"/>',
+          Rectangle: '<rect x="4" y="6" width="16" height="12" rx="1.5"/>',
+          Shape: '<path d="M5 8 12 4l7 5-2 10H7z"/>',
+          zoom: '<circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',
+          trash:
+            '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'
+        }
+        const svg = (name) =>
+          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`
+
+        /* ---------- Map and background (PDOK, no API key needed) ---------- */
+        const map = L.map('map', { zoomControl: false }).fitBounds(
+          [
+            [50.75, 3.36],
+            [53.55, 7.23]
+          ],
+          { padding: [12, 12] }
+        )
+        L.control.zoom({ position: 'bottomright' }).addTo(map)
 
         const pdokAttr =
-          'Map © <a href="https://www.kadaster.nl">Kadaster</a> / <a href="https://www.pdok.nl">PDOK</a>'
-        const brt = (style) =>
-          L.tileLayer(
-            `https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/${style}/EPSG:3857/{z}/{x}/{y}.png`,
-            {
-              maxZoom: 21,
-              maxNativeZoom: 19,
-              minZoom: 6,
-              attribution: pdokAttr
-            }
-          )
+          '© <a href="https://www.kadaster.nl">Kadaster</a> / <a href="https://www.pdok.nl">PDOK</a>'
+        const tileOpts = {
+          maxZoom: 21,
+          maxNativeZoom: 19,
+          minZoom: 6,
+          attribution: pdokAttr
+        }
         const bases = {
-          Topographic: brt('standaard'),
-          Grey: brt('grijs'),
-          Pastel: brt('pastel'),
-          'Aerial photo': L.tileLayer(
+          map: L.tileLayer(
+            'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png',
+            tileOpts
+          ),
+          aerial: L.tileLayer(
             'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg',
-            {
-              maxZoom: 21,
-              maxNativeZoom: 19,
-              minZoom: 6,
-              attribution: pdokAttr
-            }
+            tileOpts
           )
         }
-        bases['Grey'].addTo(map)
-        L.control.layers(bases, null, { position: 'topright' }).addTo(map)
+        let base = 'map'
+        bases.map.addTo(map)
+
+        document.querySelectorAll('.basemap button').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            if (btn.dataset.base === base) return
+            map.removeLayer(bases[base])
+            base = btn.dataset.base
+            bases[base].addTo(map).bringToBack()
+            document
+              .querySelectorAll('.basemap button')
+              .forEach((b) => b.setAttribute('aria-pressed', String(b === btn)))
+            restyleAreas()
+          })
+        })
 
         /* ---------- Helpers ---------- */
-        const $ = (id) => document.getElementById(id)
         const round6 = (c) =>
           typeof c[0] === 'number'
             ? [Math.round(c[0] * 1e6) / 1e6, Math.round(c[1] * 1e6) / 1e6]
@@ -553,6 +960,7 @@
             .replace(/[̀-ͯ]/g, '')
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-|-$/g, '')
+        const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`
 
         function bboxOf(geom) {
           let minX = Infinity,
@@ -570,34 +978,177 @@
           return [minX, minY, maxX, maxY]
         }
 
+        // geodesic area of a ring in m² (same formula Leaflet.draw uses)
+        function ringArea(pts) {
+          const R = 6378137,
+            rad = Math.PI / 180
+          let a = 0
+          for (let i = 0; i < pts.length; i++) {
+            const p1 = pts[i],
+              p2 = pts[(i + 1) % pts.length]
+            a +=
+              (p2.lng - p1.lng) *
+              rad *
+              (2 + Math.sin(p1.lat * rad) + Math.sin(p2.lat * rad))
+          }
+          return Math.abs((a * R * R) / 2)
+        }
+        const fmtArea = (m2) =>
+          m2 >= 1e6
+            ? `${(m2 / 1e6).toLocaleString('en', {
+                maximumFractionDigits: m2 >= 1e8 ? 0 : 1
+              })} km²`
+            : `${(m2 / 1e4).toLocaleString('en', {
+                maximumFractionDigits: 1
+              })} ha`
+        const fmtLength = (m) =>
+          m >= 1000
+            ? `${(m / 1000).toLocaleString('en', {
+                maximumFractionDigits: 1
+              })} km`
+            : `${Math.round(m)} m`
+
+        function measure(layer) {
+          if (layer.getLatLng) {
+            const { lat, lng } = layer.getLatLng()
+            return `${lat.toFixed(4)}, ${lng.toFixed(4)}`
+          }
+          if (layer instanceof L.Polygon)
+            return fmtArea(ringArea(layer.getLatLngs()[0]))
+          const pts = layer.getLatLngs()
+          let m = 0
+          for (let i = 1; i < pts.length; i++)
+            m += map.distance(pts[i - 1], pts[i])
+          return fmtLength(m)
+        }
+
+        /* ---------- Hint bar: what to do right now, with the matching actions ---------- */
+        function setHint(text, actions = []) {
+          $('hint').hidden = !text
+          $('hint-text').textContent = text || ''
+          const box = $('hint-actions')
+          box.innerHTML = ''
+          actions.forEach(({ label, onClick, primary, disabled }) => {
+            const b = document.createElement('button')
+            b.type = 'button'
+            b.textContent = label
+            if (primary) b.className = 'primary'
+            b.disabled = Boolean(disabled)
+            b.addEventListener('click', () => {
+              onClick()
+              updateHint()
+            })
+            box.append(b)
+          })
+          $('hint').classList.toggle('no-actions', actions.length === 0)
+        }
+
+        function updateHint() {
+          if (activeTab === 'areas') {
+            const showHint =
+              areas.features.length > 0 && areas.selected.size === 0
+            setHint(
+              showHint
+                ? 'Click areas on the map or in the list to select them'
+                : ''
+            )
+            return
+          }
+          const shape = map.pm.Draw.getActiveShape()
+          const done = [{ label: 'Done', primary: true, onClick: exitModes }]
+          if (map.pm.globalEditModeEnabled())
+            return setHint(
+              'Drag the white points to reshape. Right-click a point to remove it.',
+              done
+            )
+          if (map.pm.globalDragModeEnabled())
+            return setHint('Drag a shape to move it', done)
+          if (map.pm.globalRemovalModeEnabled())
+            return setHint('Click a shape to delete it', done)
+          const cancel = {
+            label: 'Cancel',
+            onClick: () => map.pm.disableDraw()
+          }
+          if (shape === 'Marker')
+            return setHint('Click on the map to place a point', [cancel])
+          if (shape === 'Rectangle')
+            return setHint('Click one corner, then the opposite corner', [
+              cancel
+            ])
+          if (shape === 'Line' || shape === 'Polygon') {
+            const n = vertexCount()
+            const undoPoint = {
+              label: 'Undo point',
+              disabled: n === 0,
+              onClick: undoPointOrShape
+            }
+            const finish =
+              shape === 'Line'
+                ? {
+                    label: 'Finish line',
+                    primary: true,
+                    disabled: n < 2,
+                    onClick: () => map.pm.Draw.Line._finishShape()
+                  }
+                : {
+                    label: 'Close shape',
+                    primary: true,
+                    disabled: n < 3,
+                    onClick: () => map.pm.Draw.Polygon._finishShape()
+                  }
+            const text =
+              shape === 'Line'
+                ? n === 0
+                  ? 'Click on the map to start the line'
+                  : 'Click to add points. Click the first point to close it into a shape.'
+                : n === 0
+                ? 'Click on the map to start the shape'
+                : 'Click to add points. Click the first point to close the shape.'
+            return setHint(text, [undoPoint, cancel, finish])
+          }
+          setHint(
+            drawnGroup.getLayers().length
+              ? ''
+              : 'Pick a tool on the left to start drawing'
+          )
+        }
+
+        function exitModes() {
+          map.pm.disableGlobalEditMode()
+          map.pm.disableGlobalDragMode()
+          map.pm.disableGlobalRemovalMode()
+        }
+
         /* ---------- Tabs ---------- */
         let activeTab = 'draw'
-        document.querySelectorAll('.tabs button').forEach((btn) => {
+        document.querySelectorAll('[role="tab"]').forEach((btn) => {
           btn.addEventListener('click', () => setTab(btn.dataset.tab))
         })
 
         function setTab(tab) {
           activeTab = tab
           document
-            .querySelectorAll('.tabs button')
+            .querySelectorAll('[role="tab"]')
             .forEach((b) =>
               b.setAttribute('aria-selected', String(b.dataset.tab === tab))
             )
           $('tab-draw').hidden = tab !== 'draw'
           $('tab-areas').hidden = tab !== 'areas'
+          // each mode only shows its own shapes on the map
           if (tab === 'draw') {
             showToolbar()
             if (map.hasLayer(areaLayer)) map.removeLayer(areaLayer)
+            drawnGroup.addTo(map)
           } else {
             map.pm.disableDraw()
-            map.pm.disableGlobalEditMode()
-            map.pm.disableGlobalDragMode()
-            map.pm.disableGlobalRemovalMode()
+            exitModes()
             map.pm.removeControls()
+            map.removeLayer(drawnGroup)
             areaLayer.addTo(map)
             if (!areas.loadedOnce) loadLevel()
           }
           updateExport()
+          updateHint()
         }
 
         /* ---------- Draw your own (Leaflet-Geoman) ---------- */
@@ -606,7 +1157,7 @@
         const types = new Map() // leafletId -> type label, survives undo
         // Each entry is the full drawing after a change; undo steps back one entry.
         const history = [[]]
-        const pathOptions = { color: '#e8620f', weight: 2.5, fillOpacity: 0.25 }
+        const pathOptions = { color: '#316aea', weight: 2.5, fillOpacity: 0.2 }
         const drawControls = {
           position: 'topleft',
           drawCircle: false, // circles don't exist in GeoJSON
@@ -627,21 +1178,16 @@
               editButton: 'Edit points',
               dragButton: 'Move shapes',
               deleteButton: 'Delete shapes'
-            },
-            actions: {
-              finish: 'Finish', // also the button that ends edit, move and delete mode
-              cancel: 'Cancel',
-              removeLastVertex: 'Undo last point'
-            },
-            tooltips: {
-              finishLine:
-                'Click the last point to finish, or the first point to close the shape',
-              finishPoly: 'Click the first point to close the shape'
             }
           },
           'en'
         )
-        map.pm.setGlobalOptions({ layerGroup: drawnGroup, pathOptions })
+        // the hint bar explains each step, so no tooltip following the cursor
+        map.pm.setGlobalOptions({
+          layerGroup: drawnGroup,
+          pathOptions,
+          tooltips: false
+        })
 
         map.pm.Toolbar.createCustomControl({
           name: 'undo',
@@ -650,7 +1196,7 @@
           className: 'leaflet-pm-icon-undo',
           toggle: false,
           disableOtherButtons: false, // keep the current drawing going so undo can take back a point
-          onClick: undo
+          onClick: undoPointOrShape
         })
 
         // swap the slow native title for an instant hover label
@@ -667,12 +1213,21 @@
         }
         showToolbar()
 
+        map.on('pm:drawstart', (e) => {
+          e.workingLayer?.on('pm:vertexadded pm:vertexremoved', updateHint)
+          updateHint()
+        })
+        map.on(
+          'pm:drawend pm:globaleditmodetoggled pm:globaldragmodetoggled pm:globalremovalmodetoggled',
+          updateHint
+        )
+
         function typeLabel(layer) {
           if (layer instanceof L.Marker) return 'Point'
           if (layer instanceof L.Rectangle) return 'Rectangle'
           if (layer instanceof L.Polygon) return 'Shape'
           if (layer instanceof L.Polyline) return 'Line'
-          return 'Feature'
+          return 'Shape'
         }
 
         function track(layer, name = '') {
@@ -690,6 +1245,9 @@
         let lastPointer = null
         map.on('mousemove', (e) => {
           lastPointer = e.containerPoint
+        })
+        map.on('mouseout', () => {
+          lastPointer = null
         })
 
         map.on('pm:create', (e) => {
@@ -724,50 +1282,85 @@
           })
         }
 
+        function highlight(layer, on) {
+          if (layer.setStyle)
+            layer.setStyle({
+              weight: on ? 4.5 : pathOptions.weight,
+              fillOpacity: on ? 0.32 : pathOptions.fillOpacity
+            })
+        }
+
         function refreshDrawn() {
           const list = $('drawn-list')
           list.innerHTML = ''
           const layers = drawnGroup.getLayers()
           $('drawn-empty').hidden = layers.length > 0
-          $('clear-drawn').hidden = layers.length === 0
+          $('drawn-head').hidden = layers.length === 0
+          $('drawn-title').textContent = `Your shapes (${layers.length})`
           layers.forEach((layer, i) => {
             const id = L.stamp(layer)
+            const type = types.get(id) || typeLabel(layer)
             const li = document.createElement('li')
-            li.className = 'drawn-item'
-            li.innerHTML = `<span class="type">${
-              types.get(id) || typeLabel(layer)
-            }</span>`
-            const input = document.createElement('input')
-            input.type = 'text'
-            input.placeholder = 'Name (optional)'
+            li.className = 'shape'
+            li.innerHTML = `<span class="shape-icon">${svg(
+              type
+            )}</span><div class="shape-main"><input type="text"><div class="shape-meta"></div></div>`
+            const input = li.querySelector('input')
+            input.placeholder = `${type} ${i + 1}`
             input.value = names.get(id) || ''
-            input.setAttribute('aria-label', `Name for feature ${i + 1}`)
+            input.setAttribute(
+              'aria-label',
+              `Name for ${type.toLowerCase()} ${i + 1}`
+            )
             input.addEventListener('input', () => {
               names.set(id, input.value.trim())
               updateExport()
             })
             input.addEventListener('change', commit)
+            input.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter') input.blur()
+            })
+            li.querySelector('.shape-meta').textContent = `${type} · ${measure(
+              layer
+            )}`
+
             const zoom = document.createElement('button')
+            zoom.type = 'button'
             zoom.className = 'icon-btn'
-            zoom.textContent = 'Zoom'
+            zoom.innerHTML = svg('zoom')
+            zoom.title = 'Zoom to'
+            zoom.setAttribute(
+              'aria-label',
+              `Zoom to ${type.toLowerCase()} ${i + 1}`
+            )
             zoom.addEventListener('click', () => {
               if (layer.getLatLng)
                 map.setView(layer.getLatLng(), Math.max(map.getZoom(), 15))
               else map.fitBounds(layer.getBounds(), { padding: [40, 40] })
             })
             const del = document.createElement('button')
-            del.className = 'icon-btn'
-            del.textContent = 'Delete'
+            del.type = 'button'
+            del.className = 'icon-btn danger'
+            del.innerHTML = svg('trash')
+            del.title = 'Delete'
+            del.setAttribute(
+              'aria-label',
+              `Delete ${type.toLowerCase()} ${i + 1}`
+            )
             del.addEventListener('click', () => {
               drawnGroup.removeLayer(layer)
               names.delete(id)
               refreshDrawn()
               commit()
             })
-            li.append(input, zoom, del)
+
+            li.addEventListener('mouseenter', () => highlight(layer, true))
+            li.addEventListener('mouseleave', () => highlight(layer, false))
+            li.append(zoom, del)
             list.append(li)
           })
           updateExport()
+          updateHint()
         }
 
         $('clear-drawn').addEventListener('click', () => {
@@ -820,26 +1413,25 @@
         }
 
         function drawingShape() {
-          const shape =
-            map.pm.Draw.getActiveShape && map.pm.Draw.getActiveShape()
+          const shape = map.pm.Draw.getActiveShape()
           return shape && map.pm.Draw[shape]
         }
 
-        function undo() {
+        function vertexCount() {
+          const drawing = drawingShape()
+          return drawing?._layer?.getLatLngs?.().length || 0
+        }
+
+        function undoPointOrShape() {
           // while drawing a line or shape, take back the last point first
           const drawing = drawingShape()
-          if (
-            drawing &&
-            drawing._removeLastVertex &&
-            drawing._layer?.getLatLngs?.().length > 0
-          ) {
+          if (drawing?._removeLastVertex && vertexCount() > 0) {
             drawing._removeLastVertex()
+            updateHint()
             return
           }
           if (history.length < 2) return
-          map.pm.disableGlobalEditMode()
-          map.pm.disableGlobalDragMode()
-          map.pm.disableGlobalRemovalMode()
+          exitModes()
           history.pop()
           restore(history[history.length - 1])
           updateUndoButton()
@@ -856,15 +1448,22 @@
         document.addEventListener('keydown', (e) => {
           if (activeTab !== 'draw') return
           if (e.target.closest('input, textarea, select')) return
+          const shape = map.pm.Draw.getActiveShape()
           if (
             (e.ctrlKey || e.metaKey) &&
             !e.shiftKey &&
             e.key.toLowerCase() === 'z'
           ) {
             e.preventDefault()
-            undo()
+            undoPointOrShape()
           } else if (e.key === 'Escape') {
             map.pm.disableDraw()
+            exitModes()
+          } else if (
+            e.key === 'Enter' &&
+            (shape === 'Line' || shape === 'Polygon')
+          ) {
+            map.pm.Draw[shape]._finishShape()
           }
         })
 
@@ -872,18 +1471,25 @@
         const API =
           'https://api.pdok.nl/cbs/gebiedsindelingen/ogc/v1/collections/'
         const LEVELS = {
-          provincie: { col: 'provincie_gegeneraliseerd', plural: 'provinces' },
+          provincie: {
+            col: 'provincie_gegeneraliseerd',
+            one: 'province',
+            plural: 'provinces'
+          },
           gemeente: {
             col: 'gemeente_gegeneraliseerd',
+            one: 'municipality',
             plural: 'municipalities'
           },
           wijk: {
             col: 'wijk_gegeneraliseerd',
+            one: 'district',
             plural: 'districts',
             prefix: 'WK'
           },
           buurt: {
             col: 'buurt_gegeneraliseerd',
+            one: 'neighbourhood',
             plural: 'neighbourhoods',
             prefix: 'BU'
           }
@@ -906,24 +1512,34 @@
         const renderer = L.canvas({ padding: 0.5 })
         const areaLayer = L.featureGroup()
 
-        const baseStyle = {
-          color: '#1d4f73',
-          weight: 1,
-          fillColor: '#1d4f73',
-          fillOpacity: 0.06,
-          renderer
+        function areaStyle(selected) {
+          const onAerial = base === 'aerial'
+          return selected
+            ? {
+                color: onAerial ? '#ffffff' : '#1f4fc4',
+                weight: 2,
+                fillColor: '#316aea',
+                fillOpacity: onAerial ? 0.5 : 0.4,
+                renderer
+              }
+            : {
+                color: onAerial ? '#ffffff' : '#092861',
+                weight: onAerial ? 1.2 : 0.8,
+                opacity: onAerial ? 0.9 : 0.6,
+                fillColor: '#092861',
+                fillOpacity: onAerial ? 0.04 : 0.05,
+                renderer
+              }
         }
-        const selStyle = {
-          color: '#a94300',
-          weight: 2,
-          fillColor: '#e8620f',
-          fillOpacity: 0.45,
-          renderer
+        function restyleAreas() {
+          areas.layers.forEach((layer, id) =>
+            layer.setStyle(areaStyle(areas.selected.has(id)))
+          )
         }
 
-        function setStatus(text, isError = false) {
+        function setStatus(text, kind = '') {
           $('status').textContent = text
-          $('status').classList.toggle('error', isError)
+          $('status').className = `status ${kind}`
         }
 
         async function fetchAll(url) {
@@ -971,14 +1587,13 @@
           const year = Number($('year').value)
           const def = LEVELS[level]
           $('gm-wrap').hidden = !def.prefix
-          $('gm-load').textContent = `Load ${def.plural}`
           areas.selected.clear()
 
           // Municipality list to choose from for districts/neighbourhoods
           if (def.prefix) {
             showFeatures([], '')
             const req = ++areas.requestId
-            setStatus('Loading municipalities…')
+            setStatus('Loading municipalities…', 'loading')
             try {
               const { feats } = await getCollection(LEVELS.gemeente.col, year)
               if (req !== areas.requestId) return
@@ -988,30 +1603,27 @@
                 .map((f) => f.properties.statnaam)
                 .sort((a, b) => a.localeCompare(b, 'nl'))
                 .forEach((n) => dl.append(new Option(n)))
-              setStatus(`Choose a municipality to load its ${def.plural}.`)
+              setStatus(`Choose a municipality to see its ${def.plural}`)
             } catch (err) {
-              setStatus(`Loading failed: ${err.message}`, true)
+              setStatus(`Loading failed: ${err.message}`, 'error')
             }
             updateExport()
             return
           }
 
           const req = ++areas.requestId
-          setStatus(`Loading ${def.plural} ${year}…`)
+          setStatus(`Loading ${def.plural}…`, 'loading')
           try {
             const { feats, year: used } = await getCollection(def.col, year)
             if (req !== areas.requestId) return
             areas.usedYear = used
             showFeatures(feats, `${def.plural}-${used}`)
-            const note =
-              used !== year
-                ? ` (${year} isn't available yet, using ${used})`
-                : ''
+            const note = used !== year ? `, ${year} not available yet` : ''
             setStatus(
-              `${feats.length} ${def.plural} loaded${note}. Click on the map or in the list to select.`
+              `${plural(feats.length, def.one, def.plural)} (${used}${note})`
             )
           } catch (err) {
-            setStatus(`Loading failed: ${err.message}`, true)
+            setStatus(`Loading failed: ${err.message}`, 'error')
           }
         }
 
@@ -1021,7 +1633,7 @@
           const year = Number($('year').value)
           const name = $('gm-input').value.trim().toLowerCase()
           if (!name) {
-            setStatus('Type a municipality name first.', true)
+            setStatus('Type a municipality name first', 'error')
             return
           }
           const req = ++areas.requestId
@@ -1035,14 +1647,17 @@
             )
             if (!gm) {
               setStatus(
-                `Municipality "${
+                `"${
                   $('gm-input').value
                 }" not found. Pick a name from the list.`,
-                true
+                'error'
               )
               return
             }
-            setStatus(`Loading ${def.plural} in ${gm.properties.statnaam}…`)
+            setStatus(
+              `Loading ${def.plural} in ${gm.properties.statnaam}…`,
+              'loading'
+            )
             const code = gm.properties.statcode.replace(/^GM/, '')
             const { feats, year: used } = await getCollection(
               def.col,
@@ -1059,14 +1674,19 @@
               inside,
               `${def.plural}-${slug(gm.properties.statnaam)}-${used}`
             )
-            setStatus(
-              inside.length
-                ? `${inside.length} ${def.plural} in ${gm.properties.statnaam} (${used}).`
-                : `No ${def.plural} found for ${gm.properties.statnaam} in ${used}.`,
-              !inside.length
-            )
+            if (inside.length)
+              setStatus(
+                `${plural(inside.length, def.one, def.plural)} in ${
+                  gm.properties.statnaam
+                } (${used})`
+              )
+            else
+              setStatus(
+                `No ${def.plural} found for ${gm.properties.statnaam} in ${used}`,
+                'error'
+              )
           } catch (err) {
-            setStatus(`Loading failed: ${err.message}`, true)
+            setStatus(`Loading failed: ${err.message}`, 'error')
           }
         }
 
@@ -1078,7 +1698,7 @@
           if (feats.length) {
             const gj = L.geoJSON(feats, {
               pmIgnore: true,
-              style: () => baseStyle,
+              style: () => areaStyle(false),
               onEachFeature: (f, layer) => {
                 const id = f.properties.statcode
                 areas.layers.set(id, layer)
@@ -1087,6 +1707,13 @@
                   direction: 'top'
                 })
                 layer.on('click', () => toggle(id))
+                layer.on('mouseover', () => {
+                  if (!areas.selected.has(id))
+                    layer.setStyle({ fillOpacity: 0.18 })
+                })
+                layer.on('mouseout', () =>
+                  layer.setStyle(areaStyle(areas.selected.has(id)))
+                )
               }
             })
             areaLayer.addLayer(gj)
@@ -1094,18 +1721,20 @@
           }
           renderList()
           updateExport()
+          updateHint()
         }
 
         function toggle(id, force) {
           const on = force ?? !areas.selected.has(id)
           on ? areas.selected.add(id) : areas.selected.delete(id)
           const layer = areas.layers.get(id)
-          if (layer) layer.setStyle(on ? selStyle : baseStyle)
+          if (layer) layer.setStyle(areaStyle(on))
           const btn = document.querySelector(
             `.area-item[data-id="${CSS.escape(id)}"]`
           )
           if (btn) btn.setAttribute('aria-checked', String(on))
           updateExport()
+          updateHint()
         }
 
         function visibleFeatures() {
@@ -1127,10 +1756,12 @@
             const id = f.properties.statcode
             const li = document.createElement('li')
             const btn = document.createElement('button')
+            btn.type = 'button'
             btn.className = 'area-item'
             btn.dataset.id = id
             btn.setAttribute('role', 'checkbox')
             btn.setAttribute('aria-checked', String(areas.selected.has(id)))
+            btn.title = 'Double-click to zoom'
             btn.innerHTML = `<span class="box" aria-hidden="true"></span><span></span><span class="code">${id}</span>`
             btn.children[1].textContent = f.properties.statnaam
             btn.addEventListener('click', () => toggle(id))
@@ -1142,6 +1773,9 @@
             frag.append(li)
           })
           list.append(frag)
+          const anything = areas.features.length > 0
+          $('sel-all').disabled = !anything
+          $('sel-none').disabled = !anything
         }
 
         $('level').addEventListener('change', loadLevel)
@@ -1154,6 +1788,11 @@
         $('gm-load').addEventListener('click', loadSubAreas)
         $('gm-input').addEventListener('keydown', (e) => {
           if (e.key === 'Enter') loadSubAreas()
+        })
+        // picking a suggestion from the list loads straight away
+        $('gm-input').addEventListener('input', (e) => {
+          if (e.inputType === 'insertReplacementText' || !e.inputType)
+            loadSubAreas()
         })
         $('filter').addEventListener('input', renderList)
         $('sel-all').addEventListener('click', () =>
@@ -1183,14 +1822,17 @@
         function updateExport() {
           const { data } = currentExport()
           const n = data.features.length
-          $('export-count').textContent = `${n} ${
-            n === 1 ? 'feature' : 'features'
-          }`
+          $('export-count').textContent =
+            n === 0
+              ? 'Nothing to export yet'
+              : activeTab === 'draw'
+              ? `${plural(n, 'shape', 'shapes')} ready`
+              : `${plural(n, 'area', 'areas')} selected`
           const text = JSON.stringify(data)
           $('preview').value =
             text.length > 20000
               ? text.slice(0, 20000) +
-                ' … (shortened in preview; the download has everything)'
+                ' … (shortened in preview; copy and download have everything)'
               : text
           $('download').disabled = n === 0
           $('copy').disabled = n === 0
@@ -1225,13 +1867,13 @@
             document.execCommand('copy')
             ta.remove()
           }
-          btn.textContent = 'Copied'
+          btn.textContent = 'Copied ✓'
           setTimeout(() => {
-            btn.textContent = 'Copy'
-          }, 1500)
+            btn.textContent = 'Copy GeoJSON'
+          }, 1600)
         })
 
-        updateExport()
+        refreshDrawn()
       })()
     </script>
   </body>
