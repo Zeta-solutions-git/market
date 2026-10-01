@@ -2,30 +2,59 @@
   "enabled": true,
   "title": "Hackathon challenges",
   "description": "Datasets for today's Open Dataspace Lab hackathon, grouped by challenge.",
+  "publishers": [
+    "0x72e27907EEaB11b86A4BBFbD91fC6EB19d60a657",
+    "0xEFfeDD6b8b0093f79943012944a1ABe58Fe15890"
+  ],
   "challenges": [
     {
       "id": "1",
       "name": "Brown Rot",
       "description": "",
-      "datasets": []
+      "datasets": [],
+      "match": ["brown rot", "sentinel"],
+      "links": []
     },
     {
       "id": "2",
       "name": "Soil Compaction",
       "description": "",
-      "datasets": []
+      "datasets": [],
+      "match": ["KNMI", "BRP Gewas", "sentinel"],
+      "links": [
+        {
+          "title": "AHN viewer",
+          "url": "https://www.ahn.nl/ahn-viewer",
+          "description": "Actueel Hoogtebestand Nederland: the elevation map of the Netherlands."
+        }
+      ]
     },
     {
       "id": "3",
       "name": "Wastewater Discharges",
       "description": "",
-      "datasets": []
+      "datasets": [],
+      "match": ["Rijnland", "sentinel"],
+      "links": []
     },
     {
       "id": "4",
       "name": "Roadside Fires",
       "description": "",
-      "datasets": []
+      "datasets": [],
+      "match": ["sentinel"],
+      "links": [
+        {
+          "title": "AHN viewer",
+          "url": "https://www.ahn.nl/ahn-viewer",
+          "description": "Actueel Hoogtebestand Nederland: the elevation map of the Netherlands."
+        },
+        {
+          "title": "Groenmonitor",
+          "url": "https://www.groenmonitor.nl/",
+          "description": "Satellite-based vegetation monitoring of the Netherlands."
+        }
+      ]
     }
   ]
 }

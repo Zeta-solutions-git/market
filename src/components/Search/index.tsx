@@ -184,16 +184,65 @@ function HackathonFolders({
             <span className={styles.folderEyebrow}>Challenge {c.id}</span>
             <span className={styles.folderName}>{c.name}</span>
             <span className={styles.folderCount}>
-              {c.datasets.length === 0
-                ? 'Datasets coming soon'
-                : `${c.datasets.length} dataset${
-                    c.datasets.length === 1 ? '' : 's'
-                  }`}
+              {[
+                c.datasets.length
+                  ? `${c.datasets.length} dataset${
+                      c.datasets.length === 1 ? '' : 's'
+                    }`
+                  : c.links.length
+                  ? ''
+                  : 'Datasets coming soon',
+                c.links.length
+                  ? `${c.links.length} external viewer${
+                      c.links.length === 1 ? '' : 's'
+                    }`
+                  : ''
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </span>
           </button>
         ))}
       </div>
     </section>
+  )
+}
+
+// external pages listed in a challenge: open the site, not an asset
+function HackathonLinks({
+  links
+}: {
+  links: HackathonConfig['challenges'][number]['links']
+}): ReactElement {
+  return (
+    <div className={styles.linkGrid}>
+      {links.map((l) => (
+        <a
+          key={l.url}
+          href={l.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.linkCard}
+        >
+          <span className={styles.linkType}>
+            <span
+              className={`material-symbols-rounded ${styles.linkIcon}`}
+              aria-hidden="true"
+            >
+              open_in_new
+            </span>
+            External viewer
+          </span>
+          <span className={styles.linkTitle}>{l.title}</span>
+          {l.description && (
+            <span className={styles.linkText}>{l.description}</span>
+          )}
+          <span className={styles.linkHost}>
+            {l.url.replace(/^https:\/\//, '').replace(/\/.*$/, '')}
+          </span>
+        </a>
+      ))}
+    </div>
   )
 }
 
@@ -735,6 +784,9 @@ export default function SearchPage({
                     <p className={styles.foldersText}>
                       {activeChallenge.description}
                     </p>
+                  )}
+                  {activeChallenge?.links.length > 0 && (
+                    <HackathonLinks links={activeChallenge.links} />
                   )}
                 </div>
               )}

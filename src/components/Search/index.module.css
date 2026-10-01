@@ -730,3 +730,78 @@
 .backLink span {
   font-size: 18px;
 }
+
+/* external viewer cards inside a challenge folder (same look as asset cards) */
+.linkGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 16px;
+  align-self: stretch;
+  margin-top: 12px;
+}
+
+.linkCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 24px 20px;
+  color: inherit;
+  text-decoration: none;
+  background: #ffffff;
+  border: 1px solid #e6ebf2;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(9, 40, 97, 0.1);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.linkCard:hover {
+  border-color: #c9d6f3;
+  box-shadow: 0 8px 24px rgba(9, 40, 97, 0.14);
+  transform: translateY(-2px);
+}
+
+.linkCard:focus-visible {
+  outline: 2px solid #316aea;
+  outline-offset: 2px;
+}
+
+.linkType {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #52607a;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.linkIcon {
+  color: #316aea;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.linkTitle {
+  margin-top: 4px;
+  font-family: var(--font-family-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #092861;
+}
+
+.linkText {
+  color: #52607a;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.linkHost {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #eef2f8;
+  color: #316aea;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
