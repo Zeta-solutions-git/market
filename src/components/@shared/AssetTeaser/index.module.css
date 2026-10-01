@@ -235,6 +235,9 @@
 
 /* temporary (hackathon week): challenge label next to the type */
 .challenge {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   padding: 2px 8px;
   border-radius: 999px;
   background: #eaf0fd;

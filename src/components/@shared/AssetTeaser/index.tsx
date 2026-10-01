@@ -47,7 +47,15 @@ export default function AssetTeaser({
   const price = noPrice ? undefined : getAssetPriceLabel(asset)
   const shownTags = (tags || []).filter(Boolean).slice(0, MAX_TAGS)
   // temporary (hackathon week): which challenge folder(s) this asset is in
-  const challenges = useHackathon().challengesFor(asset.id)
+  const hackathon = useHackathon()
+  const challenges = hackathon.challengesFor(asset.id)
+  const challengeLabel =
+    challenges.length === 0
+      ? ''
+      : challenges.length === hackathon.config?.challenges.length &&
+        challenges.length > 1
+      ? 'All challenges'
+      : `Challenge ${challenges.map((c) => c.id).join(', ')}`
 
   return (
     <article
@@ -64,15 +72,16 @@ export default function AssetTeaser({
           <span className={styles.typeLabel}>
             {isAlgorithm ? 'Algorithm' : 'Dataset'}
           </span>
-          {challenges.map((c) => (
+          {challengeLabel && (
             <span
-              key={c.id}
               className={styles.challenge}
-              title={`Hackathon challenge ${c.id}: ${c.name}`}
+              title={challenges
+                .map((c) => `Challenge ${c.id}: ${c.name}`)
+                .join('\n')}
             >
-              Challenge {c.id}
+              {challengeLabel}
             </span>
-          ))}
+          )}
         </div>
 
         <h3 className={styles.title}>{name?.slice(0, 200)}</h3>
