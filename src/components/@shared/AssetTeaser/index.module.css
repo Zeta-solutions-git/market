@@ -232,3 +232,14 @@
     font-size: 1.05rem;
   }
 }
+
+/* temporary (hackathon week): challenge label next to the type */
+.challenge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eaf0fd;
+  color: #316aea;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}

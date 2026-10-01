@@ -71,7 +71,8 @@ function getSearchQuery(
   supportedBlockchain?: string | string[],
   filterSet?: string | string[],
   assetState?: string | string[],
-  nodeUriIndex?: string | string[]
+  nodeUriIndex?: string | string[],
+  didList?: string[]
 ): SearchQuery {
   text = escapeEsReservedCharacters(text)
   const emptySearchTerm = text === undefined || text === ''
@@ -199,6 +200,8 @@ function getSearchQuery(
     ['accessType', 'serviceType', 'priceType', 'filterSet', 'nodeUriIndex']
   )
   parseFilters(filtersList, filterSets).forEach((term) => filters.push(term))
+  // hackathon challenge folder: only these assets (an empty list matches none)
+  if (didList) filters.push(getFilterTerm('_id', didList))
   const normalizedPage = normalizeSearchPage(page)
 
   const baseQueryParams = {
@@ -241,7 +244,8 @@ export async function getResults(
     nodeUriIndex?: string | string[]
   },
   chainIds: number[],
-  cancelToken?: CancelToken
+  cancelToken?: CancelToken,
+  didList?: string[]
 ): Promise<PagedAssets> {
   const {
     text,
@@ -276,7 +280,8 @@ export async function getResults(
     supportedBlockchain,
     filterSet,
     assetState,
-    nodeUriIndex
+    nodeUriIndex,
+    didList
   )
   const queryResult = await queryMetadata(searchQuery, cancelToken)
 

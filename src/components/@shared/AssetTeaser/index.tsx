@@ -6,6 +6,7 @@ import styles from './index.module.css'
 import { AssetExtended } from 'src/@types/AssetExtended'
 import Bookmark from '@components/Asset/AssetContent/Bookmark'
 import { getAssetPriceLabel, getAssetUsageLabels } from '@utils/assetPriceLabel'
+import { useHackathon } from '@hooks/useHackathon'
 
 declare type AssetTeaserProps = {
   asset: AssetExtended
@@ -45,6 +46,8 @@ export default function AssetTeaser({
   const usage = getAssetUsageLabels(asset)
   const price = noPrice ? undefined : getAssetPriceLabel(asset)
   const shownTags = (tags || []).filter(Boolean).slice(0, MAX_TAGS)
+  // temporary (hackathon week): which challenge folder(s) this asset is in
+  const challenges = useHackathon().challengesFor(asset.id)
 
   return (
     <article
@@ -61,6 +64,15 @@ export default function AssetTeaser({
           <span className={styles.typeLabel}>
             {isAlgorithm ? 'Algorithm' : 'Dataset'}
           </span>
+          {challenges.map((c) => (
+            <span
+              key={c.id}
+              className={styles.challenge}
+              title={`Hackathon challenge ${c.id}: ${c.name}`}
+            >
+              Challenge {c.id}
+            </span>
+          ))}
         </div>
 
         <h3 className={styles.title}>{name?.slice(0, 200)}</h3>

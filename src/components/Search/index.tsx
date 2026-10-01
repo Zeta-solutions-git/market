@@ -25,6 +25,7 @@ import {
 import networkdata from '../../../content/networks-metadata.json'
 import { accountTruncate } from '@utils/wallet'
 import { MAXIMUM_NUMBER_OF_PAGES_WITH_RESULTS } from '@utils/aquarius'
+import { HackathonConfig, useHackathon } from '@hooks/useHackathon'
 import {
   FilterByAccessOptions,
   FilterByPriceOptions,
@@ -148,6 +149,54 @@ function FilterPanel({
   )
 }
 
+// ---------------------------------------------------------------- hackathon
+// Temporary (hackathon week): challenge folders from hackathon/hackathon.json.
+// Remove with the "Hackathon challenge folders" commit; see hackathon/README.md.
+function HackathonFolders({
+  config,
+  onOpen
+}: {
+  config: HackathonConfig
+  onOpen: (id: string) => void
+}): ReactElement {
+  return (
+    <section className={styles.folders} aria-labelledby="hackathon-folders">
+      <h2 id="hackathon-folders" className={styles.foldersTitle}>
+        {config.title}
+      </h2>
+      {config.description && (
+        <p className={styles.foldersText}>{config.description}</p>
+      )}
+      <div className={styles.folderGrid}>
+        {config.challenges.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            className={styles.folder}
+            onClick={() => onOpen(c.id)}
+          >
+            <span
+              className={`material-symbols-rounded ${styles.folderIcon}`}
+              aria-hidden="true"
+            >
+              folder
+            </span>
+            <span className={styles.folderEyebrow}>Challenge {c.id}</span>
+            <span className={styles.folderName}>{c.name}</span>
+            <span className={styles.folderCount}>
+              {c.datasets.length === 0
+                ? 'Datasets coming soon'
+                : `${c.datasets.length} dataset${
+                    c.datasets.length === 1 ? '' : 's'
+                  }`}
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 // ---------------------------------------------------------------- page
 export default function SearchPage({
   setTotalResults,
@@ -169,6 +218,7 @@ export default function SearchPage({
   const resultsRef = useRef<HTMLElement>(null)
   const [firstRowHeight, setFirstRowHeight] = useState<number>()
   const newCancelToken = useCancelToken()
+  const { config: hackathon, loaded: hackathonLoaded } = useHackathon()
 
   useEffect(() => {
     if (!router.isReady) return
@@ -183,6 +233,16 @@ export default function SearchPage({
   }, [router.isReady, router.asPath])
 
   const params: Params = useMemo(() => (parsed || {}) as Params, [parsed])
+  const challengeId =
+    typeof params.challenge === 'string' ? params.challenge : undefined
+  const activeChallenge = hackathon?.challenges.find(
+    (c) => c.id === challengeId
+  )
+  // inside a challenge folder: only its datasets (unknown folder: none)
+  const challengeDids = challengeId
+    ? activeChallenge?.datasets || []
+    : undefined
+  const challengeKey = challengeDids ? challengeDids.join(',') : ''
 
   const navigate = useCallback(
     (updates: Params, keepPage = false) => {
@@ -203,10 +263,19 @@ export default function SearchPage({
   )
 
   const fetchAssets = useDebouncedCallback(
-    async (parsed: queryString.ParsedQuery<string>, chainIds: number[]) => {
+    async (
+      parsed: queryString.ParsedQuery<string>,
+      chainIds: number[],
+      didList?: string[]
+    ) => {
       setLoading(true)
       setTotalResults(undefined)
-      const queryResult = await getResults(parsed, chainIds, newCancelToken())
+      const queryResult = await getResults(
+        parsed,
+        chainIds,
+        newCancelToken(),
+        didList
+      )
       setQueryResult(queryResult)
 
       setTotalResults(queryResult?.totalResults || 0)
@@ -225,16 +294,24 @@ export default function SearchPage({
     if (
       !parsed ||
       isValidatingSupportedChains ||
-      validatedSupportedChains.length === 0
+      validatedSupportedChains.length === 0 ||
+      (challengeId && !hackathonLoaded)
     )
       return
 
-    fetchAssets(parsed, validatedSupportedChains)
+    fetchAssets(
+      parsed,
+      validatedSupportedChains,
+      challengeKey ? challengeKey.split(',') : challengeId ? [] : undefined
+    )
   }, [
     parsed,
     validatedSupportedChains,
     fetchAssets,
-    isValidatingSupportedChains
+    isValidatingSupportedChains,
+    challengeId,
+    challengeKey,
+    hackathonLoaded
   ])
 
   // search as you type; best match while searching, newest otherwise
@@ -273,6 +350,17 @@ export default function SearchPage({
 
   // applied filters, shown as removable chips above the results
   const chips: { key: string; label: string; remove: () => void }[] = [
+    ...(challengeId
+      ? [
+          {
+            key: 'challenge',
+            label: activeChallenge
+              ? `Challenge ${activeChallenge.id}: ${activeChallenge.name}`
+              : `Challenge ${challengeId}`,
+            remove: () => navigate({ challenge: undefined })
+          }
+        ]
+      : []),
     ...['accessType', 'priceType', 'supportedBlockchain'].flatMap((id) =>
       asList(params[id]).map((value) => ({
         key: `${id}-${value}`,
@@ -308,6 +396,7 @@ export default function SearchPage({
       owner: undefined,
       text: undefined,
       serviceType: undefined,
+      challenge: undefined,
       sort: params.sort === Relevance ? undefined : (params.sort as string),
       sortOrder:
         params.sort === Relevance ? undefined : (params.sortOrder as string)
@@ -354,10 +443,14 @@ export default function SearchPage({
       <h2 className={styles.emptyTitle}>
         {hasText
           ? `No results for “${String(params.text).trim()}”`
+          : challengeId && filterCount === 1 && !activeTab
+          ? 'No datasets in this challenge yet'
           : 'No results'}
       </h2>
       <p className={styles.emptyText}>
-        Try another search term or remove some filters.
+        {challengeId && filterCount === 1 && !activeTab && !hasText
+          ? 'Datasets for this challenge will appear here.'
+          : 'Try another search term or remove some filters.'}
       </p>
       {(hasText || filterCount > 0 || activeTab) && (
         <button
@@ -605,6 +698,46 @@ export default function SearchPage({
               className={styles.results}
               aria-label="Results"
             >
+              {hackathon && !challengeId && Number(params.page || 1) <= 1 && (
+                <HackathonFolders
+                  config={hackathon}
+                  onOpen={(id) => navigate({ challenge: id })}
+                />
+              )}
+              {challengeId && (
+                <div className={styles.folderHeader}>
+                  <button
+                    type="button"
+                    className={styles.backLink}
+                    onClick={() => navigate({ challenge: undefined })}
+                  >
+                    <span
+                      className="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      arrow_back
+                    </span>
+                    All assets
+                  </button>
+                  <p className={styles.folderEyebrow}>
+                    <span
+                      className="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      folder_open
+                    </span>
+                    {hackathon?.title || 'Hackathon'} · Challenge {challengeId}
+                  </p>
+                  <h2 className={styles.folderHeaderTitle}>
+                    {activeChallenge?.name || 'Unknown challenge'}
+                  </h2>
+                  {activeChallenge?.description && (
+                    <p className={styles.foldersText}>
+                      {activeChallenge.description}
+                    </p>
+                  )}
+                </div>
+              )}
               <AssetList
                 assets={queryResult?.results}
                 showPagination

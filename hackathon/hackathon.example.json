@@ -1,0 +1,31 @@
+{
+  "enabled": true,
+  "title": "Hackathon challenges",
+  "description": "Datasets for today's Open Dataspace Lab hackathon, grouped by challenge.",
+  "challenges": [
+    {
+      "id": "1",
+      "name": "Brown Rot",
+      "description": "",
+      "datasets": []
+    },
+    {
+      "id": "2",
+      "name": "Soil Compaction",
+      "description": "",
+      "datasets": []
+    },
+    {
+      "id": "3",
+      "name": "Wastewater Discharges",
+      "description": "",
+      "datasets": []
+    },
+    {
+      "id": "4",
+      "name": "Roadside Fires",
+      "description": "",
+      "datasets": []
+    }
+  ]
+}

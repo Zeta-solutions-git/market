@@ -26,3 +26,6 @@ storybook-static
 .qodo
 next-env.d.ts
 public/runtime-config.js
+
+# live hackathon config (ops data, mounted into the container)
+hackathon/hackathon.json
