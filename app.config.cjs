@@ -36,10 +36,16 @@ module.exports = {
     ['https://ocean-node-vm3.oceanenterprise.io']
   ),
 
-  nodeUri:
-    getEnv('NEXT_PUBLIC_NODE_URI') ||
-    process.env.NEXT_PUBLIC_NODE_URI ||
-    'https://eth-sepolia-testnet.api.pocket.network',
+  // may be a same-origin path to the server-side RPC proxy (/api/rpc/<chainId>)
+  nodeUri: (() => {
+    const uri =
+      getEnv('NEXT_PUBLIC_NODE_URI') ||
+      process.env.NEXT_PUBLIC_NODE_URI ||
+      'https://eth-sepolia-testnet.api.pocket.network'
+    return uri.startsWith('/') && typeof window !== 'undefined'
+      ? `${window.location.origin}${uri}`
+      : uri
+  })(),
 
   customProviderUrl:
     getEnv('NEXT_PUBLIC_PROVIDER_URL') || process.env.NEXT_PUBLIC_PROVIDER_URL,

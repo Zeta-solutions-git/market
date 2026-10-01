@@ -146,6 +146,16 @@ function parseRuntimeObject(rawValue?: string): Record<string, unknown> | null {
   }
 }
 
+// RPC entries may be same-origin paths ("/api/rpc/11155111", the server-side
+// proxy that keeps the provider key off the browser). ethers/viem need an
+// absolute URL, so prefix the current origin.
+export function resolveSameOriginUrl(value: string): string {
+  if (value.startsWith('/') && typeof window !== 'undefined') {
+    return `${window.location.origin}${value}`
+  }
+  return value
+}
+
 export function getNodeUriMap(
   fallback: Record<string, string> = {}
 ): Record<string, string> {
@@ -155,7 +165,7 @@ export function getNodeUriMap(
   return Object.keys(parsed).reduce((acc: Record<string, string>, key) => {
     const value = parsed[key]
     if (typeof value === 'string' && value.trim().length > 0) {
-      acc[key] = value
+      acc[key] = resolveSameOriginUrl(value.trim())
     }
     return acc
   }, {})
