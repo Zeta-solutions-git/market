@@ -1,13 +1,20 @@
 name: oe-market
 services:
   ocean-market:
-    image: oceanenterprise/market:v1.5.0
+    # Built from this repo (`docker compose up -d --build`). Config comes from
+    # .env at container start, so the same image works for any deployment.
+    build: .
+    image: ocean-market:local
     container_name: ocean-market
     ports:
-      # Localhost only: nginx terminates TLS on 443 and proxies here.
+      # Localhost only: put a TLS reverse proxy (nginx, Caddy) in front.
       - '127.0.0.1:8008:8008'
     env_file:
       - .env
     environment:
       NODE_ENV: production
+    volumes:
+      # Optional hackathon challenge folders, editable live (see hackathon/README.md).
+      # Without hackathon/hackathon.json the feature is simply off.
+      - ./hackathon:/app/hackathon:ro
     restart: unless-stopped
